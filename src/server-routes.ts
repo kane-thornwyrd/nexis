@@ -1,8 +1,1 @@
-import pkg from "../package.json";
-
-export default {
-  "/config.json": Response.json({
-    ...{ name: pkg.name },
-    ...pkg.serverConfig,
-  }),
-};
+export { default } from "@/infrastructure/http/config-routes";

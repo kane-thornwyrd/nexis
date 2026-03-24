@@ -40,6 +40,16 @@ type BuildStepResult = {
   } | null;
 };
 
+type RuntimeTargetOptions = {
+  platform?: OperatingSystemCode | null;
+  arch?: ArchCode | null;
+  packageName?: string;
+  scripts?: Partial<Record<string, string>>;
+};
+
+const stripCurrentDirectoryPrefix = (filePath: string): string =>
+  filePath.replace(/^\.\//, "");
+
 const SOURCE_WATCH_ROOT = "./src";
 const STATIC_WATCH_PATHS = [
   "./build-watcher.ts",
@@ -53,10 +63,9 @@ const STYLE_RELEVANT_EXTENSIONS = new Set([
   ".jsx",
   ".tsx",
 ]);
-const STYLE_RELEVANT_FILES = new Set([
-  "build-watcher.ts",
-  "tailwind.config.js",
-]);
+const STYLE_RELEVANT_FILES = new Set(
+  STATIC_WATCH_PATHS.map(stripCurrentDirectoryPrefix),
+);
 const BUILD_SCRIPT_BY_TARGET: Record<
   OperatingSystemCode,
   Record<ArchCode, string>
@@ -74,6 +83,7 @@ const BUILD_SCRIPT_BY_TARGET: Record<
     arm64: "subbuild:bin:linux-arm",
   },
 };
+const OUTFILE_FLAG_PATTERN = /--outfile(?:=|\s+)(?:"([^"]+)"|'([^']+)'|(\S+))/;
 
 let proc = null as Subprocess | null;
 let current = Promise.resolve();
@@ -89,21 +99,28 @@ const closeWatcher = (watcher: FSWatcher) => {
   }
 };
 
+const hasExplicitRelativePathPrefix = (filePath: string): boolean => {
+  return (
+    filePath.startsWith("./") ||
+    filePath.startsWith("../") ||
+    filePath.startsWith(".\\") ||
+    filePath.startsWith("..\\")
+  );
+};
+
 const formatWatchedPath = (
   watchPath: string,
   filename: string | null,
 ): string | null => {
   if (!filename) {
-    return watchPath.replace(/^\.\//, "");
+    return stripCurrentDirectoryPrefix(watchPath);
   }
 
   if (path.extname(watchPath)) {
-    return watchPath.replace(/^\.\//, "");
+    return stripCurrentDirectoryPrefix(watchPath);
   }
 
-  return path
-    .join(watchPath, filename)
-    .replace(/^\.\//, "")
+  return stripCurrentDirectoryPrefix(path.join(watchPath, filename))
     .split(path.sep)
     .join("/");
 };
@@ -154,19 +171,60 @@ const resolveArch = (): ArchCode | null => {
   return null;
 };
 
-const getRuntimeTarget = (): RuntimeTarget | null => {
-  const platform = resolvePlatform();
-  const arch = resolveArch();
+export const normalizeExecutablePath = (binaryPath: string): string => {
+  if (
+    path.isAbsolute(binaryPath) ||
+    hasExplicitRelativePathPrefix(binaryPath)
+  ) {
+    return binaryPath;
+  }
+
+  return `./${binaryPath}`;
+};
+
+export const parseOutfileFromBuildScript = (script: string): string | null => {
+  const outfileMatch = script.match(OUTFILE_FLAG_PATTERN);
+  const binaryPath =
+    outfileMatch?.[1] ?? outfileMatch?.[2] ?? outfileMatch?.[3] ?? null;
+
+  return binaryPath ? normalizeExecutablePath(binaryPath) : null;
+};
+
+const resolveBinaryPathFromScripts = (
+  scripts: Partial<Record<string, string>>,
+  buildScript: string,
+): string | null => {
+  const script = scripts[buildScript];
+
+  if (!script) {
+    return null;
+  }
+
+  return parseOutfileFromBuildScript(script);
+};
+
+export const getRuntimeTarget = (
+  options: RuntimeTargetOptions = {},
+): RuntimeTarget | null => {
+  const platform = options.platform ?? resolvePlatform();
+  const arch = options.arch ?? resolveArch();
 
   if (!platform || !arch) {
     return null;
   }
 
+  const buildScript = BUILD_SCRIPT_BY_TARGET[platform][arch];
+  const packageName = options.packageName ?? pkg.name;
+  const scripts = options.scripts ?? pkg.scripts;
+  const binaryPath =
+    resolveBinaryPathFromScripts(scripts, buildScript) ??
+    normalizeExecutablePath(`bin/${platform}-${arch}/${packageName}`);
+
   return {
     platform,
     arch,
-    binaryPath: `./bin/${platform}-${arch}/${pkg.name}`,
-    buildScript: BUILD_SCRIPT_BY_TARGET[platform][arch],
+    binaryPath,
+    buildScript,
   };
 };
 
@@ -412,12 +470,6 @@ const refreshSourceWatchers = () => {
     collectRecursiveWatchPaths(SOURCE_WATCH_ROOT).map(createWatcher);
 };
 
-STATIC_WATCH_PATHS.forEach((watchPath) => {
-  staticWatchers.push(createWatcher(watchPath));
-});
-
-refreshSourceWatchers();
-
 const closeWatchers = () => {
   staticWatchers.forEach(closeWatcher);
   closeSourceWatchers();
@@ -453,21 +505,32 @@ const exitAfterShutdown = (code: number) => {
   void shutdown().finally(() => process.exit(code));
 };
 
-void compile("change" as WatchEventType, null);
+export const startBuildWatcher = () => {
+  STATIC_WATCH_PATHS.forEach((watchPath) => {
+    staticWatchers.push(createWatcher(watchPath));
+  });
 
-process.once("SIGINT", () => {
-  exitAfterShutdown(0);
-});
+  refreshSourceWatchers();
+  void compile("change" as WatchEventType, null);
 
-process.once("SIGTERM", () => {
-  exitAfterShutdown(0);
-});
+  process.once("SIGINT", () => {
+    exitAfterShutdown(0);
+  });
 
-process.once("SIGHUP", () => {
-  exitAfterShutdown(0);
-});
+  process.once("SIGTERM", () => {
+    exitAfterShutdown(0);
+  });
 
-process.once("exit", () => {
-  closeWatchers();
-  killChildProcessSync();
-});
+  process.once("SIGHUP", () => {
+    exitAfterShutdown(0);
+  });
+
+  process.once("exit", () => {
+    closeWatchers();
+    killChildProcessSync();
+  });
+};
+
+if (import.meta.main) {
+  startBuildWatcher();
+}

@@ -1,26 +1,19 @@
-// import db from "./nexis.save" with { type: "sqlite" };
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+
 import { App } from "./App";
-import { AppStateProvider } from "./app-state/useAppState";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 
-// console.log(db.query("SELECT * FROM TABLE NAME;").get());
+const rootElement = document.getElementById("root");
 
-const elem = document.getElementById("root");
-
-if (!elem) {
+if (!rootElement) {
   throw new Error("Unable to find the #root element for app mounting.");
 }
 
-const app = (
+createRoot(rootElement).render(
   <StrictMode>
     <AppErrorBoundary>
-      <AppStateProvider>
-        <App />
-      </AppStateProvider>
+      <App />
     </AppErrorBoundary>
-  </StrictMode>
+  </StrictMode>,
 );
-
-createRoot(elem).render(app);

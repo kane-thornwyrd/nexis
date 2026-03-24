@@ -20,6 +20,11 @@ export const FONT_SIZE_OPTIONS = [
 
 type FontSizeValue = (typeof FONT_SIZE_OPTIONS)[number]["value"];
 type FontSizeStorageAction = "read" | "write";
+type FontSizeStorage = Pick<Storage, "getItem" | "setItem">;
+type FontSizeStyleTarget = Pick<
+  CSSStyleDeclaration,
+  "fontSize" | "removeProperty"
+>;
 
 const DEFAULT_FONT_SIZE: FontSizeValue = "1em";
 const FONT_SIZE_STORAGE_KEY = "nexis:html-font-size";
@@ -48,13 +53,23 @@ const warnFontSizeStorageIssue = (
   console.warn(`Unable to ${action} the HTML font size preference.`, error);
 };
 
-const readStoredFontSize = (): FontSizeValue => {
+const getFontSizeStorage = (): FontSizeStorage | null => {
   if (typeof window === "undefined") {
+    return null;
+  }
+
+  return window.localStorage;
+};
+
+export const readStoredFontSize = (
+  storage: Pick<Storage, "getItem"> | null = getFontSizeStorage(),
+): FontSizeValue => {
+  if (!storage) {
     return DEFAULT_FONT_SIZE;
   }
 
   try {
-    const storedFontSize = window.localStorage.getItem(FONT_SIZE_STORAGE_KEY);
+    const storedFontSize = storage.getItem(FONT_SIZE_STORAGE_KEY);
 
     if (storedFontSize && isFontSizeValue(storedFontSize)) {
       return storedFontSize;
@@ -67,35 +82,59 @@ const readStoredFontSize = (): FontSizeValue => {
   return DEFAULT_FONT_SIZE;
 };
 
-const persistFontSize = (fontSize: FontSizeValue) => {
+export const persistFontSize = (
+  fontSize: FontSizeValue,
+  storage: Pick<Storage, "setItem"> | null = getFontSizeStorage(),
+) => {
+  if (!storage) {
+    return;
+  }
+
   try {
-    window.localStorage.setItem(FONT_SIZE_STORAGE_KEY, fontSize);
+    storage.setItem(FONT_SIZE_STORAGE_KEY, fontSize);
   } catch (error) {
     warnFontSizeStorageIssue("write", error);
   }
+};
+
+export const captureInlineFontSize = (style: FontSizeStyleTarget): string =>
+  style.fontSize;
+
+export const applyInlineFontSize = (
+  style: FontSizeStyleTarget,
+  fontSize: FontSizeValue,
+) => {
+  style.fontSize = fontSize;
+};
+
+export const restoreInlineFontSize = (
+  style: FontSizeStyleTarget,
+  previousFontSize: string,
+) => {
+  if (previousFontSize) {
+    style.fontSize = previousFontSize;
+    return;
+  }
+
+  style.removeProperty("font-size");
 };
 
 export const useHtmlFontSize = () => {
   const [fontSize, setFontSize] = useState(readStoredFontSize);
 
   useEffect(() => {
-    document.documentElement.style.fontSize = fontSize;
-    persistFontSize(fontSize);
-  }, [fontSize]);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    const previousFontSize = root.style.fontSize;
+    const rootStyle = document.documentElement.style;
+    const previousFontSize = captureInlineFontSize(rootStyle);
 
     return () => {
-      if (previousFontSize) {
-        root.style.fontSize = previousFontSize;
-        return;
-      }
-
-      root.style.removeProperty("font-size");
+      restoreInlineFontSize(rootStyle, previousFontSize);
     };
   }, []);
+
+  useEffect(() => {
+    applyInlineFontSize(document.documentElement.style, fontSize);
+    persistFontSize(fontSize);
+  }, [fontSize]);
 
   return { fontSize, setFontSize };
 };

@@ -47,3 +47,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Copilot hook session state
 .github/hooks/.state/
+
+# generated release workflow metadata
+.github/.release/

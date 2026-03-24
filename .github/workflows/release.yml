@@ -1,0 +1,151 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "**"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
+
+jobs:
+  release:
+    if: github.event_name == 'workflow_dispatch' || github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify default branch
+        run: |
+          if [ "${GITHUB_REF_NAME}" != "${{ github.event.repository.default_branch }}" ]; then
+            echo "This workflow must run from ${{ github.event.repository.default_branch }}."
+            exit 1
+          fi
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Decide whether to release
+        id: release_gate
+        run: |
+          threshold=$(bun --eval 'import { AUTO_RELEASE_COMMIT_INTERVAL } from "./scripts/release/release-utils"; console.log(AUTO_RELEASE_COMMIT_INTERVAL)')
+          commit_message=$(git log -1 --pretty=%s)
+          latest_tag=$(git tag --list 'v*' --sort=-version:refname | head -n1)
+
+          echo "threshold=$threshold" >> "$GITHUB_OUTPUT"
+          echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "reason=manual" >> "$GITHUB_OUTPUT"
+            echo "commit_count=manual" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "$commit_message" == Release\ v* ]]; then
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "reason=release-commit" >> "$GITHUB_OUTPUT"
+            echo "commit_count=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -z "$latest_tag" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "reason=first-release" >> "$GITHUB_OUTPUT"
+            echo "commit_count=first-release" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          commit_count=$(git rev-list --count "${latest_tag}..HEAD")
+
+          echo "commit_count=$commit_count" >> "$GITHUB_OUTPUT"
+
+          if [ "$commit_count" -ge "$threshold" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "reason=threshold-reached" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "should_release=false" >> "$GITHUB_OUTPUT"
+          echo "reason=threshold-not-met" >> "$GITHUB_OUTPUT"
+
+      - name: Skip release this push
+        if: steps.release_gate.outputs.should_release != 'true'
+        run: |
+          echo "Skipping release: ${{ steps.release_gate.outputs.reason }}"
+          echo "Commits since last release: ${{ steps.release_gate.outputs.commit_count }}"
+
+      - name: Prepare release metadata
+        if: steps.release_gate.outputs.should_release == 'true'
+        run: bun run release:prepare
+
+      - name: Read release metadata
+        if: steps.release_gate.outputs.should_release == 'true'
+        id: release_meta
+        run: |
+          echo "tag=$(head -n1 .github/.release/tag.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether package version changed
+        if: steps.release_gate.outputs.should_release == 'true'
+        id: version_change
+        run: |
+          if git diff --quiet -- package.json; then
+            echo "should_commit=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_commit=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configure git author
+        if: steps.release_gate.outputs.should_release == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Build release binaries
+        if: steps.release_gate.outputs.should_release == 'true'
+        run: bun run build
+
+      - name: Commit and push version bump
+        if: steps.release_gate.outputs.should_release == 'true' && steps.version_change.outputs.should_commit == 'true'
+        run: |
+          git add -- package.json
+          git commit -F .github/.release/commit-message.txt
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Create and push release tag
+        if: steps.release_gate.outputs.should_release == 'true'
+        run: |
+          git tag "${{ steps.release_meta.outputs.tag }}"
+          git push origin "${{ steps.release_meta.outputs.tag }}"
+
+      - name: Publish GitHub release
+        if: steps.release_gate.outputs.should_release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release_meta.outputs.tag }}
+        run: |
+          mapfile -t raw_assets < .github/.release/assets.txt
+          assets=()
+          for asset in "${raw_assets[@]}"; do
+            if [[ -n "$asset" ]]; then
+              assets+=("$asset")
+            fi
+          done
+          gh release create "$RELEASE_TAG" \
+            --title "$RELEASE_TAG" \
+            --notes-file .github/.release/release-notes.md \
+            "${assets[@]}"

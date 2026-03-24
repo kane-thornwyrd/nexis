@@ -1,0 +1,5 @@
+const RENDER_ROUTE_BASE_PATH = "/render";
+
+export const ADMIN_SURFACE_PATH = "/";
+export const RENDER_SURFACE_CLIENT_PATH = `${RENDER_ROUTE_BASE_PATH}/:mode?`;
+export const RENDER_SURFACE_SERVER_PATH = `${RENDER_ROUTE_BASE_PATH}/*`;

@@ -5,14 +5,24 @@ type State =
   | { type: "running"; proc: Bun.Subprocess }
   | { type: "stopping"; proc: Bun.Subprocess };
 
-export function createProcess(cmd: string[], opts?: Record<string, any>) {
+type SpawnProcess = (
+  cmd: string[],
+  opts: Record<string, any>,
+) => Bun.Subprocess;
+
+export function createProcess(
+  cmd: string[],
+  opts?: Record<string, any>,
+  dependencies?: { spawn?: SpawnProcess },
+) {
   let state: State = { type: "idle" };
+  const spawnProcess = dependencies?.spawn ?? bSpawn;
 
   // Permet de chaîner les opérations (évite les races)
   let current = Promise.resolve();
 
   const spawn = () => {
-    const proc = bSpawn(cmd, {
+    const proc = spawnProcess(cmd, {
       ...opts,
       stdout: "inherit",
       stderr: "inherit",

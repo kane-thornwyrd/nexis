@@ -1,185 +1,78 @@
-# nexis
+# NEXIS
 
-[![NPM version][npm-badge]][npm-url] [![Build Status][github-build-badge]][github-build-url] [![Coverage Status][coverage-badge]][coverage-url]
+Stream enhancer with widgets and data.
 
-Welcome to the `nexis` project! This template provides a starting point for building a modern web application using [Bun](https://bun.sh), a high-performance all-in-one JavaScript runtime, and [React](https://reactjs.org).
+NEXIS is a local-first Bun + React application for experimenting with stream-facing widgets, operator controls, and data-driven overlay surfaces. The current app serves a root admin surface and a placeholder render route while the project moves toward an event-sourced state model with replay, undo, and future real-time synchronization.
 
-## Table of Contents
+## Current Surfaces
 
-- [Features](#features)
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [Best Practices](#best-practices)
-- [Contributing](#contributing)
-- [License](#license)
+- `/` empty admin surface with an empty dashboard drawer shell
+- `/render/:mode?` render route placeholder for future views in streaming software able to compose a web source
 
-## Features
+## Stack
 
-This template includes the following features:
-
-- **Bun Runtime**: Leveraging the latest performance and features of the Bun runtime.
-- **React**: Using React to build the user interface.
-- **TypeScript**: With built-in support for TypeScript.
-- **Routing**: Optional support for routing with React Router.
-- **ESLint**: For linting and code quality.
-- **Gitignore**: A comprehensive `.gitignore` file to avoid accidental commits.
-- **README.md**: This file with clear instructions and documentation.
-- **Test Environment**: A simple Jest setup for unit tests.
+- Bun runtime, Bun server, and compiled host binaries
+- React 19 and TypeScript
+- Wouter routing
+- Tailwind plus shadcn/ui primitives
+- Effect for domain and state architecture work
 
 ## Getting Started
 
-To get started with this template, follow these steps:
-
-1. **Installation**: Run `bun install` in the terminal to install the dependencies.
+1. Install dependencies.
 
 ```bash
 bun install
 ```
 
-2. **Development**: Start the development server with `bun dev` to see the application in action.
+2. Start the local watcher.
 
 ```bash
 bun dev
 ```
 
-Set `PORT` in the environment to override the default server port from `package.json`, for example `PORT=3000 bun dev`.
+The watcher rebuilds styles, rebuilds the host-platform binary, and restarts the local process when relevant files change.
 
-3. **Production**: Build the application for production with `bun start`.
+It resolves the executable it restarts from the matching `subbuild:bin:*` script `--outfile`, so platform-specific filenames stay aligned with `package.json`.
 
-```bash
-bun start
+Default local URL:
+
+```text
+https://localhost:8888
 ```
 
-## Project Structure
-
-The project is organized into a few key directories:
-
-- **src**: Contains the source code for the application, including React components, routes, and styles.
-- **public**: The public directory holds static files like HTML, CSS, and images.
-- **.bunignore**: A file that specifies files and directories to exclude from the build process.
-- **.gitignore**: A file that specifies files and directories to exclude from version control.
-- **.eslintrc**: Configuration file for ESLint.
-- **jest.config.js**: Configuration file for Jest.
-- **tsconfig.json**: Configuration file for TypeScript.
-- **.env.example**: An example environment variables file.
-
-## Best Practices
-
-Follow these best practices to ensure your application is well-structured and maintainable:
-
-- **Separation of Concerns**: Keep UI components separate from business logic and data models.
-- **Code Splitting**: Use code splitting to improve initial load time and lazy load components.
-- **State Management**: Decide which state management tool to use (Redux, Context API, etc.) based on your needs.
-- **Type Safety**: Always use TypeScript when possible to catch type-related errors early.
-- **Linting**: Run linting checks regularly with `bun lint`.
-- **Testing**: Write tests for your components and services using Jest.
-
-## Contributing
-
-We welcome contributions from the community. If you find any issues or have suggestions for improvements, please open an issue or submit a pull request. Make sure to follow the project's guidelines and coding standards.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-[![Bun Runtime](https://bun.sh/logo.svg)][bun-url]
-
-[bun-url]: https://bun.sh/
-[bun-badge]: https://img.shields.io/badge/bun-%3E%3D1.0.0-blue
-[bun-url]: https://bun.sh/
-[npm-url]: https://npmjs.com
-[npm-badge]: https://img.shields.io/npm/v/package-name.svg?style=flat
-[github-url]: https://github.com/username/repo
-[github-badge]: https://img.shields.io/github/stars/username/repo.svg?style=social&label=Star
-[github-url]: https://github.com/username/repo
-[github-build-badge]: https://img.shields.io/github/actions/workflow/status/username/repo/ci.yml
-[github-build-url]: https://github.com/username/repo/actions
-[coverage-badge]: https://img.shields.io/coveralls/github/username/repo.svg
-[coverage-url]: https://coveralls.io/github/username/repo
-
-[![Build Status](https://img.shields.io/github/actions/workflow/status/username/repo/ci.yml)](https://github.com/username/repo/actions)
-[![NPM version](https://img.shields.io/npm/v/package-name)](https://www.npmjs.com/package/package-name)
-[![License](https://img.shields.io/github/license/username/repo)](https://github.com/username/repo/blob/main/LICENSE)
-
-[![Bun Runtime](https://bun.sh/logo.svg)][bun-url]
-[![NPM version][npm-badge]][npm-url] [![Build Status][github-build-badge]][github-build-url] [![Coverage Status][coverage-badge]][coverage-url]
-
-Welcome to the `nexis` project! This template provides a starting point for building a modern web application using the Bun runtime and React.
-
-## Table of Contents
-
-- [Features](#features)
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [Best Practices](#best-practices)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Features
-
-This template includes the following features:
-
-- **Bun Runtime**: Using the latest performance and features of the Bun runtime.
-- **React**: Leveraging the power of React for building the user interface.
-- **TypeScript**: With built-in TypeScript support.
-- **Routing**: Optional support for routing with React Router.
-- **ESLint**: For linting and code quality.
-- **Gitignore**: A comprehensive `.gitignore` file to avoid accidental commits.
-- **README.md**: This file with clear instructions and documentation.
-- **Test Environment**: A simple Jest setup for unit tests.
-
-## Getting Started
-
-To get started with this template, follow these steps:
-
-1. **Installation**: Run `bun install` in the terminal to install the dependencies.
+Override the port when needed:
 
 ```bash
-bun install
+PORT=3000 bun dev
 ```
 
-2. **Development**: Start the development server with `bun dev` to see the application in action.
+## Useful Commands
 
-```bash
-bun dev
-```
+- `bun dev` starts the local build watcher and app process
+- `bun test` runs the test suite
+- `bun test <path-to-test-file>` runs a focused test file
+- `bun run release:prepare` resolves the next release version locally, updates `package.json` when that version changes, and writes release metadata under `.github/.release/`
+- `bun run subbuild:style` rebuilds the generated CSS bundle
+- `bun run subbuild:bin:linux` builds the Linux x64 binary to `bin/linux-x64/nexis.x64`
+- `bun run build` runs the style build plus all configured binary builds
 
-3. **Production**: Build the application for production with `bun start`.
+## Project Notes
 
-```bash
-bun start
-```
+- The frontend is bootstrapped from `src/frontend.tsx` and now routes through `src/presentation/app/AppRoutes.tsx`.
+- The Bun server entrypoint remains `src/server.ts`, with HTTP and realtime helpers under `src/infrastructure/`.
+- The active application surface is currently a minimal admin drawer shell plus the placeholder render route.
+- The current source layout centers on `src/presentation/` for routes and shells plus `src/infrastructure/` for HTTP and realtime server concerns.
+- The GitHub `Release` workflow keeps the first release on the current `package.json` version, increments the leading release number after that, builds every configured binary, publishes those binaries as GitHub release assets using the changelog slice since the previous release, and can also be triggered manually when an out-of-band release is needed.
+- The release workflow also auto-runs on default-branch pushes, publishes the very first release immediately when no release tag exists yet, and otherwise waits until at least 10 commits have landed since the previous release tag.
 
-## Project Structure
+## Project Docs
 
-The project is organized into a few key directories:
+- `PRD.md` for product and architecture direction
+- `tasks.md` for the active work tracker
+- `CHANGELOG.md` for significant project changes
 
-- **src**: Contains the source code for the application, including React components, routes, and styles.
-- **public**: The public directory holds static files like HTML, CSS, and images.
-- **.bunignore**: A file that specifies files and directories to exclude from the build process.
-- **.gitignore**: A file that specifies files and directories to exclude from version control.
-- **.eslintrc**: Configuration file for ESLint.
-- **jest.config.js**: Configuration file for Jest.
-- **tsconfig.json**: Configuration file for TypeScript.
-- **.env.example**: An example environment variables file.
+## Current Status
 
-## Best Practices
-
-Follow these best practices to ensure your application is well-structured and maintainable:
-
-- **Separation of Concerns**: Keep UI components separate from business logic and data models.
-- **Code Splitting**: Use code splitting to improve initial load time and lazy load components.
-- **State Management**: Decide which state management tool to use (Redux, Context API, etc.) based on your needs.
-- **Type Safety**: Always use TypeScript when possible to catch type-related errors early.
-- **Linting**: Run linting checks regularly with `bun lint`.
-- **Testing**: Write tests for your components and services using Jest.
-
-## Contributing
-
-We welcome contributions from the community. If you find any issues or have suggestions for improvements, please open an issue or submit a pull request. Make sure to follow the project's guidelines and coding standards.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
+- The admin surface is intentionally empty while the next overlay-driven admin flow is defined
+- Persistence, real-time sync, and final render routes are still in progress
