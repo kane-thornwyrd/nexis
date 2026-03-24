@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "bun .github/hooks/auto-validate.ts",
+        "linux": "sh .github/hooks/run-bun-hook.sh .github/hooks/auto-validate.ts",
+        "osx": "sh .github/hooks/run-bun-hook.sh .github/hooks/auto-validate.ts",
+        "cwd": ".",
+        "timeout": 180
+      }
+    ]
+  }
+}

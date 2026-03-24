@@ -1,0 +1,10 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "bunx": true,
+    "bun": true,
+    "printf": true,
+    "git check-ignore": true,
+    "true": true
+  },
+  "js/ts.tsdk.path": "node_modules/typescript/lib"
+}

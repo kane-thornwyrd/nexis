@@ -1,0 +1,34 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "bun .github/hooks/post-validation-refactors.ts",
+        "linux": "sh .github/hooks/run-bun-hook.sh .github/hooks/post-validation-refactors.ts",
+        "osx": "sh .github/hooks/run-bun-hook.sh .github/hooks/post-validation-refactors.ts",
+        "cwd": ".",
+        "timeout": 30
+      }
+    ],
+    "SubagentStop": [
+      {
+        "type": "command",
+        "command": "bun .github/hooks/post-validation-refactors.ts",
+        "linux": "sh .github/hooks/run-bun-hook.sh .github/hooks/post-validation-refactors.ts",
+        "osx": "sh .github/hooks/run-bun-hook.sh .github/hooks/post-validation-refactors.ts",
+        "cwd": ".",
+        "timeout": 30
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "bun .github/hooks/post-validation-refactors.ts",
+        "linux": "sh .github/hooks/run-bun-hook.sh .github/hooks/post-validation-refactors.ts",
+        "osx": "sh .github/hooks/run-bun-hook.sh .github/hooks/post-validation-refactors.ts",
+        "cwd": ".",
+        "timeout": 30
+      }
+    ]
+  }
+}

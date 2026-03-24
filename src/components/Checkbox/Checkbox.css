@@ -1,0 +1,193 @@
+.rocker-switch {
+  align-items: center;
+  box-shadow:
+    0 0 0.5rem 0.025rem rgba(0, 0, 0, 0.2),
+    0 0 0.05rem 0.025rem black,
+    inset 0 0 0.125rem 0.125rem -0.125rem white;
+  border-radius: 0.2rem;
+  @apply flex bg-linear-to-tr from-surface to-surface-highlight cursor-pointer;
+}
+
+.switch {
+  display: block;
+  /* border-radius: 0.3125rem; */
+  /* padding: 1.25rem; */
+  perspective: 700px;
+  @apply p-1.5 w-9 h-14;
+}
+
+.switch input {
+  display: none;
+}
+
+.switch-label {
+  display: block;
+  font-variant: small-caps;
+  @apply font-extrabold p-2 text-text-primary;
+}
+
+.switch input:checked + .button {
+  transform: translateZ(0.25rem) rotateX(25deg);
+  box-shadow:
+    0 0 1rem var(--color-purple-950),
+    0 1rem 1rem var(--color-purple-600);
+}
+
+.switch input:checked + .button .light {
+  animation: flicker 2s infinite 0.3s;
+}
+
+.switch input:checked + .button .shine {
+  opacity: 1;
+}
+
+.switch input:checked + .button .shadow {
+  opacity: 0;
+}
+
+.switch .button {
+  display: block;
+  transition: all 0.3s cubic-bezier(1, 0, 1, 1);
+  transform-origin: center center -0.25rem;
+  transform: translateZ(0.25rem) rotateX(-25deg);
+  transform-style: preserve-3d;
+  background-color: var(--color-neutral-400);
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+  background: linear-gradient(
+    var(--color-black) 0%,
+    var(--color-neutral-900) 30%,
+    var(--color-neutral-600) 70%,
+    var(--color-neutral-900) 100%
+  );
+  background-repeat: no-repeat;
+}
+
+.switch .button::before {
+  content: "";
+  background:
+    linear-gradient(
+        rgba(255, 255, 255, 0.8) 10%,
+        rgba(255, 255, 255, 0.3) 30%,
+        var(--color-neutral-400) 75%,
+        var(--color-neutral-900)
+      )
+      50% 50%/97% 97%,
+    var(--color-neutral-700);
+  background-repeat: no-repeat;
+  /* height: 3.125rem; */
+  transform-origin: top;
+  transform: rotateX(-90deg);
+  position: absolute;
+  top: 0;
+  @apply h-3 w-full;
+}
+
+.switch .button::after {
+  content: "";
+  background-image: linear-gradient(
+    var(--color-purple-950),
+    var(--color-purple-700)
+  );
+  transform-origin: top;
+  transform: translateY(0.7rem) rotateX(-90deg);
+  position: absolute;
+  bottom: 0;
+  @apply h-3 w-full;
+}
+
+.switch .light {
+  opacity: 0;
+  animation: light-off 1s;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(
+    var(--color-purple-600),
+    var(--color-purple-500) 40%,
+    transparent 70%
+  );
+}
+
+.switch .dots {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(
+    transparent 30%,
+    var(--color-neutral-900) 70%
+  );
+  background-size: 0.5rem 0.5rem;
+}
+
+.switch .characters {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(var(--color-neutral-400), var(--color-neutral-400)) 50%
+      20%/5% 20%,
+    radial-gradient(
+        circle,
+        transparent 50%,
+        white 52%,
+        white 70%,
+        transparent 72%
+      )
+      50% 80%/33% 25%;
+  background-repeat: no-repeat;
+  @apply w-full h-full;
+}
+
+.switch .shine {
+  transition: all 0.3s cubic-bezier(1, 0, 1, 1);
+  opacity: 0.3;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(var(--color-purple-500), transparent 3%) 50% 50%/97% 97%,
+    linear-gradient(
+        rgba(255, 255, 255, 0.5),
+        transparent 50%,
+        transparent 80%,
+        rgba(255, 255, 255, 0.5)
+      )
+      50% 50%/97% 97%;
+  background-repeat: no-repeat;
+}
+
+.switch .shadow {
+  transition: all 0.3s cubic-bezier(1, 0, 1, 1);
+  opacity: 1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(transparent 95%, rgba(0, 0, 0, 0.8));
+  background-repeat: no-repeat;
+}
+
+@keyframes flicker {
+  0% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 0.8;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes light-off {
+  0% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 0;
+  }
+}

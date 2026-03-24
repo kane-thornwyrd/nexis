@@ -1,0 +1,192 @@
+.dashboard-stage {
+  min-height: 100vh;
+  position: relative;
+}
+
+.dashboard-stage__page {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  padding-left: clamp(4rem, 6vw, 5.5rem);
+  padding-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.dashboard-stage__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  border: 0;
+  background: color-mix(in oklch, var(--page-depth) 26%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+  backdrop-filter: blur(10px) saturate(120%);
+}
+
+.dashboard-stage__scrim[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dashboard-drawer {
+  position: fixed;
+  top: var(--dashboard-top-offset);
+  left: 0;
+  z-index: 50;
+  width: 100vw;
+  height: 100dvh;
+  pointer-events: none;
+  transform: translateX(calc(-100% + var(--dashboard-handle-width)));
+  transition: transform 0.25s ease-in;
+  will-change: transform;
+}
+
+.dashboard-drawer[data-open="true"] {
+  transform: translateX(0);
+}
+
+.dashboard-drawer__frame {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) var(--dashboard-handle-width);
+  overflow: hidden;
+  border: 1px solid var(--surface-border);
+  border-left: 0;
+  box-shadow: var(--form-shadow);
+  backdrop-filter: blur(22px) saturate(122%);
+  pointer-events: auto;
+}
+
+.dashboard-drawer__surface {
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  border-right: 1px solid var(--surface-border);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--background) 82%, transparent),
+      transparent 22%
+    ),
+    var(--surface);
+  overflow: hidden;
+  transition:
+    opacity 180ms ease,
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 180ms ease;
+}
+
+.dashboard-drawer__surface[data-open="false"] {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-1rem);
+}
+
+.dashboard-drawer__surface[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+.dashboard-drawer__scroller {
+  height: 100%;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable both-edges;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dashboard-drawer__handle {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.8rem;
+  border: 0;
+  border-left: 1px solid var(--surface-border);
+  box-shadow:
+    inset 1rem 0 2rem color-mix(in oklch, var(--card) 94%, var(--background) 6%),
+    inset 5px 0 0.5rem white;
+  color: var(--button-text);
+  cursor: pointer;
+  padding: 0.9rem 0.45rem;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+  overflow: hidden;
+  background: var(--button-surface);
+  background-image: radial-gradient(
+    circle,
+    color-mix(in oklch, var(--color-neutral-500) 20%, transparent) 30%,
+    transparent 20%
+  );
+  background-size: 12px 12px;
+}
+
+.dashboard-drawer__handle:hover {
+  background: var(--button-hover-surface);
+}
+
+.dashboard-drawer__handle:active {
+  transform: translateX(1px);
+}
+
+.dashboard-drawer__handle:focus-visible {
+  outline: 2px solid var(--focus-edge);
+  outline-offset: -2px;
+}
+
+.dashboard-drawer__handle-status,
+.dashboard-drawer__handle-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.dashboard-drawer__handle-status {
+  color: color-mix(in oklch, var(--text-tertiary) 20%, transparent);
+  letter-spacing: 0.5em;
+  position: relative;
+  left: calc(var(--spacing) * 1);
+  font-size: var(--text-6xl);
+  line-height: var(--text-6xl--line-height);
+  font-weight: var(--font-weight-extrabold);
+}
+
+.dashboard-drawer__handle-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.dashboard-drawer__handle-chevron {
+  filter: drop-shadow(0 0 5px var(--foreground));
+  color: var(--background);
+  transition: transform 200ms ease;
+}
+
+.dashboard-drawer[data-open="true"] .dashboard-drawer__handle-chevron {
+  transform: rotate(180deg);
+}
+
+@supports not (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .dashboard-stage__scrim {
+    background: color-mix(in oklch, var(--page-depth) 44%, transparent);
+  }
+
+  .dashboard-drawer__frame,
+  .dashboard-drawer__surface {
+    background: color-mix(in oklch, var(--card) 94%, var(--background) 6%);
+  }
+}

@@ -1,0 +1,222 @@
+@font-face {
+  font-family: "Geist Mono Variable";
+  src: url("../node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2")
+    format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Variable";
+  src: url("../node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2")
+    format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Consola";
+  src:
+    url("./consola-mono-font/ConsolaMono-DBA0.woff") format("woff"),
+    url("./consola-mono-font/ConsolaMono-DBA0.ttf") format("truetype");
+  font-weight: 100 699;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Consola";
+  src:
+    url("./consola-mono-font/ConsolaMonoBold-A9Am.woff") format("woff"),
+    url("./consola-mono-font/ConsolaMonoBold-A9Am.ttf") format("truetype");
+  font-weight: 700 1000;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-mono: "Consola", "Geist Mono Variable", monospace;
+  --font-heading: "Consola", "Geist Variable", sans-serif;
+  --page-base: var(--background);
+  --page-depth: color-mix(
+    in oklch,
+    var(--background) 82%,
+    var(--secondary) 18%
+  );
+  --page-glow-a: color-mix(in oklch, var(--primary) 14%, transparent);
+  --page-glow-b: color-mix(in oklch, var(--sidebar-primary) 12%, transparent);
+  --page-glow-c: color-mix(in oklch, var(--primary) 14%, transparent);
+  --surface: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--card) 96%, var(--background) 4%) 0%,
+    color-mix(in oklch, var(--card) 78%, var(--secondary) 22%) 100%
+  );
+  --surface-border: color-mix(in oklch, var(--border) 88%, transparent);
+  --surface-shadow:
+    0 0.72rem 1.48rem color-mix(in oklch, var(--foreground) 10%, transparent),
+    inset 0 1px 0 color-mix(in oklch, var(--background) 80%, transparent),
+    inset 0 -0.3rem 0.72rem
+      color-mix(in oklch, var(--foreground) 4%, transparent);
+  --surface-highlight: color-mix(in oklch, var(--background) 72%, transparent);
+  --copy-surface: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--background) 88%, var(--card) 12%),
+    color-mix(in oklch, var(--card) 76%, var(--secondary) 24%)
+  );
+  --copy-border: color-mix(in oklch, var(--border) 76%, transparent);
+  --copy-shadow:
+    inset 0 1px 0 color-mix(in oklch, var(--background) 56%, transparent),
+    0 0.28rem 0.74rem color-mix(in oklch, var(--foreground) 7%, transparent);
+  --text-primary: var(--foreground);
+  --text-secondary: color-mix(in oklch, var(--foreground) 72%, transparent);
+  --text-tertiary: color-mix(in oklch, var(--foreground) 54%, transparent);
+  --accent-track-start: var(--primary);
+  --accent-track-end: color-mix(
+    in oklch,
+    var(--primary) 65%,
+    var(--chart-5) 35%
+  );
+  --accent-gradient: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--primary) 84%, white 16%) 0%,
+    var(--primary) 54%,
+    color-mix(in oklch, var(--primary) 70%, black 30%) 100%
+  );
+  --accent-border: color-mix(in oklch, var(--primary) 38%, var(--border) 62%);
+  --accent-text: var(--primary-foreground);
+  --accent-glow: color-mix(in oklch, var(--primary) 18%, transparent);
+  --field-bg: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--background) 88%, var(--card) 12%) 0%,
+    color-mix(in oklch, var(--card) 82%, var(--muted) 18%) 100%
+  );
+  --field-border: color-mix(in oklch, var(--input) 92%, transparent);
+  --field-shadow:
+    inset 0 1px 0 color-mix(in oklch, var(--background) 74%, transparent),
+    inset 0 -0.18rem 0.46rem
+      color-mix(in oklch, var(--foreground) 4%, transparent),
+    0 0.26rem 0.68rem color-mix(in oklch, var(--foreground) 6%, transparent);
+  --thumb-bg: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--background) 94%, white 6%),
+    color-mix(in oklch, var(--card) 80%, var(--muted) 20%)
+  );
+  --thumb-border: color-mix(in oklch, var(--border) 84%, var(--primary) 16%);
+  --switch-track-top: color-mix(
+    in oklch,
+    var(--muted) 86%,
+    var(--background) 14%
+  );
+  --switch-track-bottom: color-mix(
+    in oklch,
+    var(--secondary) 78%,
+    var(--foreground) 22%
+  );
+  --switch-track-border: color-mix(in oklch, var(--border) 84%, transparent);
+  --switch-thumb-top: color-mix(in oklch, var(--background) 94%, white 6%);
+  --switch-thumb-bottom: color-mix(in oklch, var(--card) 80%, var(--muted) 20%);
+  --switch-thumb-shadow: color-mix(
+    in oklch,
+    var(--foreground) 18%,
+    transparent
+  );
+  --button-surface: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--card) 94%, var(--background) 6%) 0%,
+    color-mix(in oklch, var(--card) 76%, var(--secondary) 24%) 100%
+  );
+  --button-border: color-mix(in oklch, var(--border) 88%, transparent);
+  --button-text: var(--foreground);
+  --button-shadow:
+    0 0.34rem 0.76rem color-mix(in oklch, var(--foreground) 8%, transparent),
+    inset 0 1px 0 color-mix(in oklch, var(--background) 74%, transparent),
+    inset 0 -0.2rem 0.52rem
+      color-mix(in oklch, var(--foreground) 4%, transparent);
+  --button-hover-surface: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--accent) 56%, var(--card) 44%) 0%,
+    color-mix(in oklch, var(--accent) 78%, var(--card) 22%) 100%
+  );
+  --group-bg: color-mix(in oklch, var(--muted) 58%, transparent);
+  --group-border: color-mix(in oklch, var(--border) 72%, transparent);
+  --group-highlight: color-mix(in oklch, var(--background) 46%, transparent);
+  --focus-ring: color-mix(in oklch, var(--ring) 24%, transparent);
+  --focus-edge: var(--primary);
+  --form-shadow:
+    0 0.72rem 1.34rem color-mix(in oklch, var(--foreground) 8%, transparent),
+    inset 0 1px 0 color-mix(in oklch, var(--background) 82%, transparent),
+    inset 0 -0.3rem 0.72rem
+      color-mix(in oklch, var(--foreground) 4%, transparent);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.496 0.265 301.924);
+  --primary-foreground: oklch(0.977 0.014 308.299);
+  --secondary: oklch(0.967 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.897 0.196 126.665);
+  --chart-2: oklch(0.768 0.233 130.85);
+  --chart-3: oklch(0.648 0.2 131.684);
+  --chart-4: oklch(0.532 0.157 131.589);
+  --chart-5: oklch(0.453 0.124 130.933);
+  --radius: 0;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.558 0.288 302.321);
+  --sidebar-primary-foreground: oklch(0.977 0.014 308.299);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  --dashboard-handle-width: clamp(3rem, 4vw, 3.85rem);
+  --dashboard-top-offset: 0;
+}
+
+@theme {
+  --color-surface: var(--surface);
+  --color-surface-border: var(--surface-border);
+  --color-surface-shadow: var(--surface-shadow);
+  --color-surface-highlight: var(--surface-highlight);
+  --color-copy-surface: var(--copy-surface);
+  --color-copy-border: var(--copy-border);
+  --color-copy-shadow: var(--copy-shadow);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-accent-track-start: var(--accent-track-start);
+  --color-accent-track-end: var(--accent-track-end);
+  --color-accent-gradient: var(--accent-gradient);
+  --color-accent-border: var(--accent-border);
+  --color-accent-text: var(--accent-text);
+  --color-accent-glow: var(--accent-glow);
+  --color-field-bg: var(--field-bg);
+  --color-field-border: var(--field-border);
+  --color-field-shadow: var(--field-shadow);
+  --color-thumb-bg: var(--thumb-bg);
+  --color-thumb-border: var(--thumb-border);
+  --color-switch-track-top: var(--switch-track-top);
+  --color-switch-track-bottom: var(--switch-track-bottom);
+  --color-switch-track-border: var(--switch-track-border);
+  --color-switch-thumb-top: var(--switch-thumb-top);
+  --color-switch-thumb-bottom: var(--switch-thumb-bottom);
+  --color-switch-thumb-shadow: var(--switch-thumb-shadow);
+  --color-button-surface: var(--button-surface);
+  --color-button-border: var(--button-border);
+  --color-button-text: var(--button-text);
+  --color-button-shadow: var(--button-shadow);
+  --color-button-hover-surface: var(--button-hover-surface);
+  --color-group-bg: var(--group-bg);
+}

@@ -1,0 +1,12 @@
+[serve.static]
+env = "BUN_PUBLIC_*"
+plugins = ["bun-plugin-tailwind"]
+
+[install]
+exact = true
+
+[run]
+bun = true
+
+[test]
+root = "./__tests__"

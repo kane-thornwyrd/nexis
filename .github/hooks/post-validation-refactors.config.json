@@ -1,0 +1,14 @@
+{
+  "passes": [
+    {
+      "id": "lightweight-components",
+      "agent": "Lightweight Components Guard",
+      "selector": "react-components"
+    },
+    {
+      "id": "refactoring-tricks",
+      "agent": "Refactoring Tricks Guard",
+      "selector": "source-files"
+    }
+  ]
+}

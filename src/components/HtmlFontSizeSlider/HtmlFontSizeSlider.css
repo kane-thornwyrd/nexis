@@ -1,0 +1,35 @@
+.control-panel {
+  @apply relative flex w-full flex-col gap-1 overflow-hidden border border-border/70 bg-card/75 p-2.5 text-foreground shadow-lg shadow-black/10 backdrop-blur-xl;
+}
+
+.control-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 48% 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--background) 66%, transparent),
+    transparent
+  );
+}
+
+.control-panel__header {
+  @apply relative z-10 flex items-center justify-between gap-1 text-[0.58rem] font-medium uppercase tracking-[0.12em] text-muted-foreground;
+}
+
+.control-panel__value {
+  @apply min-w-12 text-right tabular-nums text-foreground;
+}
+
+.html-font-size-slider__group {
+  @apply relative z-10 inline-grid w-full grid-cols-3 gap-1 rounded-none border border-border/70 bg-background/70 p-1 shadow-inner shadow-black/5 backdrop-blur-sm;
+}
+
+.html-font-size-slider__item {
+  @apply flex w-full items-center justify-center rounded-none border border-transparent bg-transparent px-0 text-muted-foreground shadow-none transition duration-150 ease-out hover:-translate-y-px hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 data-[state=on]:border-primary/40 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:shadow-md data-[state=on]:shadow-primary/20;
+}
+
+.html-font-size-slider__item svg {
+  @apply shrink-0;
+}

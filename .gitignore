@@ -1,0 +1,49 @@
+# dependencies (bun install)
+node_modules/
+
+# build output and generated artifacts
+bin/
+out/
+dist/
+*.tgz
+src/index.css
+.npm-run-all-next-runtimes.json
+
+# local runtime files
+src/*.save
+src/cert.pem
+src/key.pem
+
+# code coverage
+coverage/
+*.lcov
+
+# logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun-debug.log*
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# caches
+.eslintcache
+.cache/
+*.tsbuildinfo
+
+# IntelliJ based IDEs
+.idea/
+
+# Finder (MacOS) folder config
+.DS_Store
+
+# Copilot hook session state
+.github/hooks/.state/

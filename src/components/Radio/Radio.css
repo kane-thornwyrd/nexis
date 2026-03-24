@@ -1,0 +1,55 @@
+.radio-group {
+  @apply rounded-2xl border border-stone-300/70 bg-stone-100/60 p-3 shadow-sm shadow-stone-950/5 dark:border-zinc-700/70 dark:bg-zinc-900/60 dark:shadow-black/20;
+}
+
+.radio-group__legend {
+  @apply px-1 text-[0.72rem] font-bold uppercase tracking-[0.04em] text-stone-600 dark:text-zinc-300;
+}
+
+.radio-group__items {
+  @apply grid gap-1.5;
+}
+
+.radio-option {
+  @apply flex cursor-pointer items-start gap-3 rounded-xl border border-transparent px-2 py-1.5 transition duration-150 hover:bg-white/75 dark:hover:bg-zinc-800/75;
+}
+
+.radio-option[data-disabled="true"] {
+  @apply cursor-not-allowed opacity-50;
+}
+
+.radio-option__input {
+  @apply sr-only;
+}
+
+.radio-option__control {
+  @apply mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-stone-400 bg-white shadow-sm shadow-stone-950/10 transition duration-150 dark:border-zinc-600 dark:bg-zinc-950 dark:shadow-black/20;
+}
+
+.radio-option__dot {
+  @apply h-2.5 w-2.5 rounded-full bg-transparent transition duration-150;
+}
+
+.radio-option__input:checked + .radio-option__control {
+  @apply border-purple-500 bg-purple-50 shadow-md shadow-purple-500/15 dark:border-purple-400 dark:bg-purple-500/10 dark:shadow-purple-500/15;
+}
+
+.radio-option__input:checked + .radio-option__control .radio-option__dot {
+  @apply bg-gradient-to-b from-purple-500 to-purple-500 dark:from-purple-400 dark:to-purple-500;
+}
+
+.radio-option__input:focus-visible + .radio-option__control {
+  @apply outline-2 outline-offset-2 outline-purple-400;
+}
+
+.radio-option__copy {
+  @apply flex min-w-0 flex-col gap-0.5;
+}
+
+.radio-option__label {
+  @apply text-sm font-semibold text-zinc-900 dark:text-zinc-100;
+}
+
+.radio-option__description {
+  @apply text-xs leading-snug text-stone-600 dark:text-zinc-400;
+}

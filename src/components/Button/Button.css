@@ -1,0 +1,463 @@
+.app-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 2.375rem;
+  margin: 0 0.25em;
+  padding: 0.1em 1em;
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--color-neutral-50) 66%,
+      var(--color-neutral-300) 34%
+    );
+  border-radius: 2em;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-white) 78%, transparent) 0%,
+      color-mix(in srgb, var(--color-white) 42%, transparent) 5%,
+      transparent 46%
+    ),
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--color-white) 22%, transparent),
+      transparent 34%,
+      color-mix(in srgb, var(--color-violet-500) 8%, transparent) 76%,
+      transparent 100%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-neutral-50) 96%, transparent),
+      color-mix(in srgb, var(--color-neutral-50) 50%, transparent) 46%,
+      color-mix(in srgb, var(--color-neutral-200) 82%, transparent)
+    );
+  box-shadow:
+    0 0.85rem 1.8rem
+      color-mix(in srgb, var(--color-neutral-950) 15%, transparent),
+    0 0 0 0.0625rem color-mix(in srgb, var(--color-white) 52%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-white) 92%, transparent),
+    inset 0 -0.12rem 0.45rem
+      color-mix(in srgb, var(--color-neutral-300) 16%, transparent);
+  color: var(--color-neutral-800);
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--color-white) 72%, transparent);
+  vertical-align: middle;
+  white-space: nowrap;
+  cursor: pointer;
+  backdrop-filter: blur(1rem) saturate(150%);
+  -webkit-backdrop-filter: blur(1rem) saturate(150%);
+  transition:
+    transform 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease,
+    box-shadow 120ms ease,
+    color 120ms ease;
+}
+
+.app-button::before {
+  content: "";
+  position: absolute;
+  inset: 0.0625rem;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      circle at 18% 14%,
+      color-mix(in srgb, var(--color-white) 82%, transparent),
+      transparent 32%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-white) 78%, transparent) 0%,
+      color-mix(in srgb, var(--color-white) 26%, transparent) 24%,
+      transparent 46%,
+      color-mix(in srgb, var(--color-violet-500) 10%, transparent) 100%
+    );
+  opacity: 0.96;
+  pointer-events: none;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    background 120ms ease;
+  z-index: 0;
+}
+
+.app-button::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: -45%;
+  height: 85%;
+  border-radius: 999rem;
+  background: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--color-violet-500) 32%, transparent),
+    transparent 68%
+  );
+  opacity: 0.58;
+  filter: blur(0.9rem);
+  pointer-events: none;
+  transform: translateY(0) scaleX(1);
+  transition:
+    opacity 120ms ease,
+    filter 120ms ease,
+    transform 120ms ease;
+  z-index: 0;
+}
+
+.app-button__content {
+  position: relative;
+  z-index: 1;
+}
+
+.app-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: color-mix(
+    in srgb,
+    var(--color-violet-400) 40%,
+    var(--color-neutral-100) 60%
+  );
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-white) 82%, transparent) 0%,
+      color-mix(in srgb, var(--color-white) 46%, transparent) 18%,
+      transparent 44%
+    ),
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--color-white) 28%, transparent),
+      transparent 34%,
+      color-mix(in srgb, var(--color-violet-500) 10%, transparent) 76%,
+      transparent 100%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-neutral-50) 96%, transparent),
+      color-mix(in srgb, var(--color-neutral-100) 90%, transparent) 44%,
+      color-mix(in srgb, var(--color-neutral-200) 84%, transparent)
+    );
+  box-shadow:
+    0 0.65rem 1.35rem
+      color-mix(in srgb, var(--color-neutral-950) 14%, transparent),
+    0 0 0 0.0625rem color-mix(in srgb, var(--color-violet-500) 18%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-white) 90%, transparent),
+    inset 0 -0.12rem 0.45rem
+      color-mix(in srgb, var(--color-violet-500) 10%, transparent);
+}
+
+.app-button:active:not(:disabled) {
+  transform: translateY(1px) scale(0.992);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-white) 56%, transparent) 0%,
+      color-mix(in srgb, var(--color-white) 18%, transparent) 22%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 55%,
+      color-mix(in srgb, var(--color-violet-500) 18%, transparent),
+      transparent 64%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-neutral-100) 84%, transparent),
+      color-mix(in srgb, var(--color-neutral-300) 74%, transparent)
+    );
+  box-shadow:
+    0 0.35rem 0.75rem
+      color-mix(in srgb, var(--color-neutral-950) 12%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-white) 26%, transparent),
+    inset 0 0 0 0.0625rem
+      color-mix(in srgb, var(--color-violet-500) 24%, transparent),
+    inset 0 0 1.15rem
+      color-mix(in srgb, var(--color-violet-500) 22%, transparent),
+    inset 0 -0.6rem 1rem
+      color-mix(in srgb, var(--color-violet-500) 16%, transparent);
+}
+
+.app-button:focus-visible {
+  outline: 0.125rem solid
+    color-mix(
+      in srgb,
+      var(--color-violet-500) 60%,
+      var(--color-fuchsia-500) 40%
+    );
+  outline-offset: 0.125rem;
+}
+
+.app-button:hover:not(:disabled)::before,
+.app-button:focus-visible::before {
+  opacity: 1;
+  transform: translateY(-2%);
+}
+
+.app-button:hover:not(:disabled)::after,
+.app-button:focus-visible::after {
+  opacity: 0.84;
+  filter: blur(0.98rem);
+}
+
+.app-button:active:not(:disabled)::before {
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      color-mix(in srgb, var(--color-violet-400) 28%, transparent),
+      transparent 58%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-white) 64%, transparent) 0%,
+      color-mix(in srgb, var(--color-white) 16%, transparent) 22%,
+      transparent 42%,
+      color-mix(in srgb, var(--color-violet-500) 20%, transparent) 100%
+    );
+  opacity: 1;
+}
+
+.app-button:active:not(:disabled)::after {
+  opacity: 1;
+  filter: blur(0.72rem);
+  transform: translateY(-10%) scaleX(0.94);
+}
+
+.app-button[data-variant="validate"] {
+  border-color: color-mix(
+    in srgb,
+    var(--color-violet-500) 54%,
+    var(--color-neutral-100) 46%
+  );
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-white) 48%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-violet-500) 18%, transparent),
+      color-mix(in srgb, var(--color-fuchsia-500) 14%, transparent)
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-neutral-50) 92%, transparent),
+      color-mix(in srgb, var(--color-neutral-200) 78%, transparent)
+    );
+  box-shadow:
+    0 0.7rem 1.45rem
+      color-mix(in srgb, var(--color-neutral-950) 14%, transparent),
+    0 0 0 0.0625rem color-mix(in srgb, var(--color-violet-500) 22%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-white) 84%, transparent);
+  color: var(--color-neutral-900);
+}
+
+.app-button[data-variant="validate"]::after {
+  opacity: 0.8;
+  background: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--color-violet-500) 34%, transparent),
+    transparent 70%
+  );
+}
+
+.app-button[data-variant="cancel"] {
+  border-color: color-mix(
+    in srgb,
+    var(--color-neutral-300) 68%,
+    var(--color-neutral-50) 32%
+  );
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-white) 42%, transparent),
+      transparent 46%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-neutral-100) 88%, transparent),
+      color-mix(in srgb, var(--color-neutral-300) 82%, transparent)
+    );
+  color: var(--color-neutral-600);
+}
+
+.app-button:disabled {
+  color: color-mix(in srgb, var(--color-neutral-500) 90%, transparent);
+  box-shadow:
+    0 0.35rem 0.9rem
+      color-mix(in srgb, var(--color-neutral-950) 10%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-white) 58%, transparent);
+}
+
+:is(.dark, [data-theme="dark"], [theme="dark"]) .app-button {
+  border-color: color-mix(
+    in srgb,
+    var(--color-zinc-300) 16%,
+    var(--color-zinc-800) 84%
+  );
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-white) 20%, transparent) 0%,
+      color-mix(in srgb, var(--color-white) 8%, transparent) 16%,
+      transparent 44%
+    ),
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--color-white) 7%, transparent),
+      transparent 34%,
+      color-mix(in srgb, var(--color-violet-500) 14%, transparent) 76%,
+      transparent 100%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-zinc-700) 72%, transparent),
+      color-mix(in srgb, var(--color-zinc-950) 86%, transparent)
+    );
+  box-shadow:
+    0 0.75rem 1.55rem color-mix(in srgb, var(--color-black) 38%, transparent),
+    0 0 0 0.0625rem color-mix(in srgb, var(--color-white) 9%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-white) 14%, transparent),
+    inset 0 -0.12rem 0.45rem
+      color-mix(in srgb, var(--color-violet-500) 10%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--color-zinc-950) 40%, transparent);
+  color: var(--color-zinc-100);
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--color-black) 32%, transparent);
+}
+
+:is(.dark, [data-theme="dark"], [theme="dark"]) .app-button::before {
+  background:
+    radial-gradient(
+      circle at 18% 14%,
+      color-mix(in srgb, var(--color-white) 18%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-white) 20%, transparent) 0%,
+      color-mix(in srgb, var(--color-white) 8%, transparent) 22%,
+      transparent 42%,
+      color-mix(in srgb, var(--color-violet-500) 18%, transparent) 100%
+    );
+}
+
+:is(.dark, [data-theme="dark"], [theme="dark"])
+  .app-button:hover:not(:disabled) {
+  border-color: color-mix(
+    in srgb,
+    var(--color-violet-400) 42%,
+    var(--color-zinc-700) 58%
+  );
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-white) 24%, transparent) 0%,
+      color-mix(in srgb, var(--color-white) 10%, transparent) 18%,
+      transparent 42%
+    ),
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--color-white) 10%, transparent),
+      transparent 34%,
+      color-mix(in srgb, var(--color-violet-500) 18%, transparent) 76%,
+      transparent 100%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-zinc-600) 76%, transparent),
+      color-mix(in srgb, var(--color-zinc-900) 88%, transparent)
+    );
+  box-shadow:
+    0 0.8rem 1.5rem color-mix(in srgb, var(--color-black) 42%, transparent),
+    0 0 0 0.0625rem color-mix(in srgb, var(--color-violet-500) 26%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-white) 16%, transparent),
+    inset 0 -0.12rem 0.45rem
+      color-mix(in srgb, var(--color-violet-500) 16%, transparent);
+}
+
+:is(.dark, [data-theme="dark"], [theme="dark"])
+  .app-button:active:not(:disabled) {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-white) 18%, transparent) 0%,
+      color-mix(in srgb, var(--color-white) 6%, transparent) 18%,
+      transparent 48%
+    ),
+    radial-gradient(
+      circle at 50% 55%,
+      color-mix(in srgb, var(--color-violet-500) 26%, transparent),
+      transparent 62%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-zinc-700) 82%, transparent),
+      color-mix(in srgb, var(--color-black) 84%, transparent)
+    );
+  box-shadow:
+    0 0.35rem 0.8rem color-mix(in srgb, var(--color-black) 42%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-white) 10%, transparent),
+    inset 0 0 0 0.0625rem
+      color-mix(in srgb, var(--color-violet-400) 30%, transparent),
+    inset 0 0 1.2rem
+      color-mix(in srgb, var(--color-violet-500) 28%, transparent),
+    inset 0 -0.65rem 1.05rem
+      color-mix(in srgb, var(--color-fuchsia-500) 10%, transparent);
+}
+
+:is(.dark, [data-theme="dark"], [theme="dark"])
+  .app-button[data-variant="validate"] {
+  border-color: color-mix(
+    in srgb,
+    var(--color-violet-400) 58%,
+    var(--color-zinc-600) 42%
+  );
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-white) 14%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-violet-500) 22%, transparent),
+      color-mix(in srgb, var(--color-fuchsia-500) 18%, transparent)
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-zinc-700) 82%, transparent),
+      color-mix(in srgb, var(--color-zinc-950) 92%, transparent)
+    );
+  color: var(--color-zinc-50);
+}
+
+:is(.dark, [data-theme="dark"], [theme="dark"])
+  .app-button[data-variant="cancel"] {
+  border-color: color-mix(
+    in srgb,
+    var(--color-zinc-400) 18%,
+    var(--color-zinc-700) 82%
+  );
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-white) 10%, transparent),
+      transparent 46%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-zinc-700) 80%, transparent),
+      color-mix(in srgb, var(--color-zinc-900) 90%, transparent)
+    );
+  color: var(--color-zinc-300);
+}
+
+:is(.dark, [data-theme="dark"], [theme="dark"]) .app-button:disabled {
+  color: color-mix(in srgb, var(--color-zinc-500) 86%, transparent);
+}
