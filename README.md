@@ -53,6 +53,7 @@ PORT=3000 bun dev
 - `bun test` runs the test suite
 - `bun test <path-to-test-file>` runs a focused test file
 - `bun run release:prepare` resolves the next release version locally, updates `package.json` when that version changes, and writes release metadata under `.github/.release/`
+- `bun run release:package-assets` archives the compiled binaries into safe `.tar.gz` upload artifacts under `.github/.release/upload-assets/`
 - `bun run subbuild:style` rebuilds the generated CSS bundle
 - `bun run subbuild:bin:linux` builds the Linux x64 binary to `bin/linux-x64/nexis.x64`
 - `bun run build` runs the style build plus all configured binary builds
@@ -64,6 +65,7 @@ PORT=3000 bun dev
 - The active application surface is currently a minimal admin drawer shell plus the placeholder render route.
 - The current source layout centers on `src/presentation/` for routes and shells plus `src/infrastructure/` for HTTP and realtime server concerns.
 - The GitHub `Release` workflow keeps the first release on the current `package.json` version, increments the leading release number after that, builds every configured binary, publishes those binaries as GitHub release assets using the changelog slice since the previous release, and can also be triggered manually when an out-of-band release is needed.
+- The release workflow archives compiled binaries before upload because GitHub blocks several raw executable filename extensions such as `.app` and `.exe` for release assets.
 - The release workflow also auto-runs on default-branch pushes, publishes the very first release immediately when no release tag exists yet, and otherwise waits until at least 10 commits have landed since the previous release tag.
 
 ## Project Docs

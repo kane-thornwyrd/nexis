@@ -3,6 +3,7 @@ import { expect, test } from "bun:test";
 import {
   AUTO_RELEASE_COMMIT_INTERVAL,
   collectBinaryAssetPaths,
+  createReleaseArchiveFileName,
   createPackageJsonVersionUpdate,
   createReleaseCommitMessage,
   createReleaseFlavorNotes,
@@ -11,6 +12,7 @@ import {
   hasReachedReleaseCommitThreshold,
   incrementReleaseVersion,
   isReleaseCommitMessage,
+  normalizeReleaseAssetPaths,
   resolveReleaseVersion,
 } from "../../../scripts/release/release-utils";
 
@@ -91,6 +93,30 @@ test("collectBinaryAssetPaths de-duplicates repeated asset paths", () => {
         "bun build --compile ./src/server.ts --outfile bin/linux-x64/nexis.x64",
     }),
   ).toEqual(["./bin/darwin-x64/nexis.app", "./bin/linux-x64/nexis.x64"]);
+});
+
+test("normalizeReleaseAssetPaths trims blank entries and preserves first-seen order", () => {
+  expect(
+    normalizeReleaseAssetPaths([
+      " ./bin/linux-x64/nexis.x64 ",
+      "",
+      ".\\bin\\windows-x64\\nexis.exe",
+      "./bin/linux-x64/nexis.x64",
+      " .\\bin\\windows-x64\\nexis.exe ",
+    ]),
+  ).toEqual(["./bin/linux-x64/nexis.x64", ".\\bin\\windows-x64\\nexis.exe"]);
+});
+
+test("createReleaseArchiveFileName maps blocked executable filenames to safe archive names", () => {
+  expect(createReleaseArchiveFileName("./bin/darwin-x64/nexis.app")).toBe(
+    "darwin-x64-nexis.tar.gz",
+  );
+  expect(createReleaseArchiveFileName("./bin/windows-x64/nexis.exe")).toBe(
+    "windows-x64-nexis.tar.gz",
+  );
+  expect(
+    createReleaseArchiveFileName(".\\bin\\windows-arm64\\nexis.arm.exe"),
+  ).toBe("windows-arm64-nexis.tar.gz");
 });
 
 test("extractChangelogSincePreviousRelease returns the top changelog slice added since the previous release", () => {

@@ -21,6 +21,8 @@
 
 
 ## Done
+- [x] Run a behavior-preserving cleanup pass on the release upload packaging files
+- [x] Fix the failed first-release upload by packaging blocked executable assets before publish
 - [x] Run a scoped post-validation cleanup pass on the first-release automation files
 - [x] Review the repo-instructions and release-automation touched files for a worthwhile post-validation cleanup pass
 - [x] Add repo commit-cadence instructions and trigger releases automatically every 10 commits

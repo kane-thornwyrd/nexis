@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "bun ./build-watcher",
     "release:prepare": "bun ./scripts/release/prepare-release.ts",
+    "release:package-assets": "bun ./scripts/release/package-release-assets.ts",
     "subbuild:style": "bun run tailwindcss -m -i ./src/main.css -o ./src/index.css",
     "subbuild:bin:linux": "bun build --compile --asset-naming=\"[name].[ext]\" --bytecode --target=bun-linux-x64 ./src/server.ts --outfile bin/linux-x64/nexis.x64",
     "subbuild:bin:linux-arm": "bun build --compile --asset-naming=\"[name].[ext]\" --bytecode --target=bun-linux-arm64 ./src/server.ts --outfile bin/linux-arm64/nexis.arm64",

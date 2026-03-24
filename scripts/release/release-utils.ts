@@ -90,12 +90,43 @@ export const normalizeReleaseAssetPath = (filePath: string): string => {
   return `./${filePath}`;
 };
 
+export const normalizeReleaseAssetPaths = (
+  assetPaths: readonly string[],
+): string[] => {
+  return [...new Set(assetPaths.map((assetPath) => assetPath.trim()).filter(Boolean))];
+};
+
+const normalizeReleasePathSeparators = (filePath: string): string => {
+  return filePath.replace(/\\/g, "/");
+};
+
+const stripCurrentDirectoryPrefix = (filePath: string): string => {
+  return filePath.replace(/^\.\//, "");
+};
+
+const stripAllExtensions = (fileName: string): string => {
+  const [baseName] = fileName.split(".");
+  return baseName || fileName;
+};
+
 export const parseOutfileFromScript = (script: string): string | null => {
   const outfileMatch = script.match(OUTFILE_FLAG_PATTERN);
   const assetPath =
     outfileMatch?.[1] ?? outfileMatch?.[2] ?? outfileMatch?.[3] ?? null;
 
   return assetPath ? normalizeReleaseAssetPath(assetPath) : null;
+};
+
+export const createReleaseArchiveFileName = (assetPath: string): string => {
+  const normalizedAssetPath = stripCurrentDirectoryPrefix(
+    normalizeReleasePathSeparators(assetPath),
+  );
+  const pathSegments = normalizedAssetPath.split("/").filter(Boolean);
+  const targetName = pathSegments.at(-2) ?? "asset";
+  const rawFileName = pathSegments.at(-1) ?? "asset";
+  const safeBaseName = stripAllExtensions(rawFileName);
+
+  return `${targetName}-${safeBaseName}.tar.gz`;
 };
 
 export const collectBinaryAssetPaths = (
@@ -109,7 +140,7 @@ export const collectBinaryAssetPaths = (
       return assetPath ? [assetPath] : [];
     });
 
-  return [...new Set(assetPaths)];
+  return normalizeReleaseAssetPaths(assetPaths);
 };
 
 const normalizeLineEndings = (value: string): string =>

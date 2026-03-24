@@ -7,6 +7,10 @@ This file tracks significant changes to the codebase and the goal behind each ch
 Add new entries in reverse chronological order.
 
 ### 2026-03-24
+- Fixed the first-release publish path by packaging compiled binaries into safe `.tar.gz` archives before upload, so GitHub release creation no longer fails on blocked raw executable extensions such as `.app` and `.exe`.
+  Goal: make the first release publish end-to-end instead of failing after the tag is created.
+- Tightened the release-upload packaging follow-up pass by deduplicating trimmed asset-path lists during packaging and routing the packaging command through `package.json`, so the workflow and docs share one entrypoint.
+  Goal: reduce release automation drift and prevent redundant archive creation from repeated asset-list entries without changing the release flow.
 - Tightened the first-release automation cleanup by making `release:prepare` skip a no-op `package.json` rewrite when the release keeps the current version, and clarified that first-release behavior in the README.
   Goal: keep release preparation idempotent for the initial release path and align the documentation with the script's actual behavior.
 - Hardened the release automation for the first real project release by keeping the initial tag on the current package version, adding a loud not-usable-yet warning to first-release notes, and allowing the workflow to publish the first release immediately when no prior release tag exists.
