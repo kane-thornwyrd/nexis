@@ -6,6 +6,53 @@
         "shadcn@4.1.0",
         "mcp"
       ]
-    }
+    },
+    "searxng": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-searxng-public"
+      ],
+      "env": {
+        "SEARXNG_BASE_URL": "https://search.liber.im",
+        "DEFAULT_LANGUAGE": "all"
+      }
+    },
+    "ripgrep": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-ripgrep@latest"
+      ]
+    },
+    "vscode-mcp-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "vscode-mcp-server"
+      ]
+    },
+    "reactbits": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "reactbits-dev-mcp-server"
+      ]
+    },
+    "its-just-ui": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "its-just-mcp"
+      ]
+    },
+    "usehooks": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-usehooks"
+      ]
+    },
   }
+
 }

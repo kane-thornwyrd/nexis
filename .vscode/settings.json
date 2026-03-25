@@ -4,7 +4,9 @@
     "bun": true,
     "printf": true,
     "git check-ignore": true,
-    "true": true
+    "true": true,
+    "timeout": true,
+    "exit": true
   },
   "js/ts.tsdk.path": "node_modules/typescript/lib"
 }

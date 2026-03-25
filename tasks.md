@@ -1,7 +1,6 @@
 # Tasks
 
 ## In Progress
-- [ ] Publish the first release with a loud not-usable-yet warning and correct first-tag versioning
 
 
 
@@ -21,6 +20,7 @@
 
 
 ## Done
+- [x] Publish the first release with a loud not-usable-yet warning and correct first-tag versioning
 - [x] Run a behavior-preserving cleanup pass on the release upload packaging files
 - [x] Fix the failed first-release upload by packaging blocked executable assets before publish
 - [x] Run a scoped post-validation cleanup pass on the first-release automation files
