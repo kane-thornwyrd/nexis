@@ -1,10 +1,10 @@
-# PRD: NEXIS
+# NEXIS: the Product Requirements Document
 
 ## 1. Product overview
 
 ### 1.1 Document title and version
 
-- PRD: NEXIS
+- NEXIS: the Product Requirements Document
 
 - Version: 0.1.0
 
@@ -14,15 +14,29 @@ NEXIS is a local-first stream enhancer with widgets and data. It is built on Bun
 
 Today the product provides a main admin surface and the first shared-state foundation for local experimentation. The current admin experience can still be used to validate presentation patterns, but it should not be treated as the authoritative source of long-term product functionality.
 
-The longer-term direction is to turn the project into a packaged single executable that lets users define enhancement configurations, bind widgets to data, preview the result, publish consistent render surfaces, synchronize updates locally, persist state safely, and inspect change history when needed.
+The longer-term direction is to turn the project into a packaged single executable that lets users define enhancement configurations, bind widgets to manual inputs and data flow resources, preview the result, publish consistent render surfaces, synchronize updates locally, persist state safely, and inspect change history when needed.
 
 ### 1.3 First-pass domain model
 
-- **Overlay**: A configuration of widgets meant to be composed on top of a video stream. It is not a single isolated panel or one-off component. A representative overlay might combine a chat widget that merges Twitch and YouTube chat on the right side of the viewport, a now-listening widget that shows the current track title and artist at the bottom of the viewport, and a donation-goal widget that displays progress toward an Ulule campaign goal.
+- **Overlay**: A configuration of widget instances meant to be composed on top of a video stream. It is not a single isolated panel or one-off component. A representative overlay might combine a chat widget instance that merges Twitch and YouTube chat on the right side of the viewport, a now-listening widget instance that shows the current track title and artist at the bottom of the viewport, and a donation-goal widget instance that displays progress toward an Ulule campaign goal. The overlay configuration also carries the widget-instance-specific configuration and an overlay dependency list for the widgets used to create those instances.
 
-- **Widget**: An element that belongs to an overlay and can be positioned on the rendering viewport. A widget will typically render a template filled with data, but it can also be non-renderable while still remaining part of the overlay definition.
+- **Widget**: A reusable, importable, and exportable source object that proposes to the person creating or modifying an overlay a way to access visual elements or data in that overlay. A widget can hold reusable resources, styles, event reactions, and other reusable behavior that will be shared by the widget instances created from it. Widgets should support both full-configuration save or restore and data-flow-resource-only save or restore, with pipeline import or export using only the latter.
 
-- **Data source**: Any input that can drive a widget. Data sources may come from in-house processing such as simple mathematical operations, file contents, or command results, as well as from third-party APIs or scraped sources such as RSS or Atom feeds.
+- **Widget resource**: A reusable resource exposed by a widget. Current examples include visual resources, sound resources, animated resources, and data flow resources. A resource may come from static code, local files, or another resource-specific storage shape, and each resource kind may define how it is saved when the widget is exported.
+
+- **Data scraper**: A source-side ingestion component that collects data from a concrete upstream input, formats that collected data into events, and creates exactly one single-domain data source from those events. That data source should contain events from a single coherent event domain. Typical upstream inputs include local processing, watched file contents, commands, APIs, RSS or Atom feeds, and external event streams such as MQTT.
+
+- **Data retriever**: A selective aggregation component that subscribes to one or more data sources in a non-destructive way, always depends on at least one upstream data source, and always produces exactly one new downstream data source from the resulting derived event stream.
+
+- **Data source**: A source of events created by a data scraper or a data retriever. A data source should represent a single coherent event domain. Data sources are the event-stream abstraction that downstream data retrievers and data flow resources can listen to.
+
+- **Widget instance**: An overlay-scoped instantiation of a widget. A widget instance keeps a reference to its source widget and updates when that source widget changes. It holds only the configuration that is specific to its use in an overlay, such as opacity, placement, or instance-specific filtering or event-selection rules, and that configuration is saved inside the overlay configuration rather than as a standalone artifact.
+
+- **Overlay dependency**: A widget dependency recorded by an overlay because one of its widget instances was created from that widget. Overlay import or activation should surface the overlay dependency list and still allow the user to continue when some referenced widgets are unavailable.
+
+- **Data flow resource**: A widget-facing resource that listens to the events of a data source, extracts or transforms those events into values that can hydrate widget fields or other widget inputs, and provides that widget-usable data without creating a new data source. In the admin pipeline editor, only widget fields backed by data flow resources participate as dots.
+
+- **Binding**: An element-owned derived configuration held on data retrievers, data flow resources, and widget-facing configuration rather than as a separate saved diagram object. Retriever configurations persist their own upstream-data-source binding identifiers, data flow resource configurations persist their own ingested-data-source binding identifiers, widget-side configuration persists its own referenced data-source identifiers, and pipeline import or export uses an archive of each element's own serialized format rather than inventing a separate whole-diagram binding schema.
 
 - **Template**: The rendering or behavior definition a widget uses to turn its data into visible output or other widget behavior. In most cases, a renderable widget displays a template filled with current data.
 
@@ -48,7 +62,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - Configure stream enhancements without needing direct code edits.
 
-- Bind widgets to relevant local or connected data and preview the result before publishing.
+- Bind widgets to relevant manual inputs and local or connected data flow resources, and preview the result before publishing.
 
 - Publish a render-safe output that matches the operator-approved preview.
 
@@ -110,13 +124,19 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Provide a safe default starting state for first-time usage.
 
+  - Display the overlay dependency list for an overlay configuration.
+
+  - When a user imports or activates an overlay configuration, present the overlay dependency list and allow the user to continue even if some referenced widgets are unavailable.
+
 - **Widget composition and layout** (Priority: High)
 
-  - Allow users to add, remove, enable, disable, and reorder widgets or overlay modules.
+  - Allow users to create, remove, enable, disable, and reorder widget instances or other overlay modules.
 
-  - Treat an overlay as a composition of multiple widgets arranged across the video viewport rather than as a single widget.
+  - Treat an overlay as a composition of multiple widget instances arranged across the video viewport rather than as a single widget.
 
-  - Treat widgets as positionable overlay elements, while still allowing some widgets to remain non-renderable members of the overlay.
+  - Treat widget instances as positionable overlay elements, while still allowing some widgets to remain non-renderable reusable sources for those instances.
+
+  - Keep reusable widget configuration separate from widget-instance-specific overlay configuration.
 
   - Support configuring widget placement, grouping, and visibility rules for render surfaces.
 
@@ -124,19 +144,65 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Reflect composition changes in preview before publication.
 
-- **Data input and mapping** (Priority: High)
+- **Widget library and portability** (Priority: Medium)
 
-  - Allow widgets to consume manual inputs, local state, and future connected data sources.
+  - Allow users to configure widgets as reusable assets outside a specific overlay.
+
+  - Allow users to export a widget as a zip package containing its configuration and whatever save format each widget resource exposes.
+
+  - Allow users to import a widget package so it becomes available in the admin interface for future widget instances.
+
+  - Keep the widget concept extensible so new resource kinds can be introduced in code without redefining the import and export workflow.
+
+- **Data pipelines and input mapping** (Priority: High)
+
+  - Allow data scrapers to collect and format events from local processing, watched file contents, commands, APIs, RSS or Atom feeds, and external event streams such as MQTT, and create exactly one single-domain data source from those events.
+
+  - Keep the data source created by a data scraper scoped to a single coherent event domain, such as chat-message events or follow-notification events rather than a mixed upstream bundle.
+
+  - Use stable persisted identifiers and faithful names for diagram-addressable scrapers, data sources, data retrievers, data flow resources, widgets, and widget instances.
+
+  - Allow data retrievers to subscribe to one or more data sources in a non-destructive way, require at least one upstream data source per retriever, and produce exactly one new downstream data source per retriever.
+
+  - Provide an admin-surface pipeline editor where data scrapers are the origins of flows, data retrievers are nodes that can sit on one flow or across multiple flows, and retrievers always create one new downstream flow without consuming the upstream ones.
+
+  - Use that pipeline editor as the primary configuration UI for event-driven widget hydration, while keeping the persisted shared configuration on the underlying data scrapers, data retrievers, data flow resources, widgets, and widget instances rather than in a separately saved diagram artifact.
+
+  - Compute retriever-node positions dynamically from the data sources they depend on and the next downstream dependency or end of the diagram, with a default midpoint placement between those dependency boundaries rather than persisting retriever positions as part of retriever configuration.
+
+  - Allow operators to enable or disable data scrapers from that pipeline editor.
+
+  - Allow operators to route upstream flows into retriever nodes and create, update, or delete retrievers through node-driven modal dialogs.
+
+  - Allow import and export of individual retriever configurations using each retriever's own serialized format.
+
+  - Allow data flow resources to listen to data source events, extract or transform those events into widget-usable values, and provide those values without creating new data sources.
+
+  - Allow operators to browse and search the current widget-instance list below the diagram, showing only widget instances that expose at least one data flow resource field and representing each such field as a dot.
+
+  - Allow those widget-field dots to be placed directly on the relevant flows so operators can configure bindings that determine which field is hydrated from which data source, with the resulting binding identifiers persisted on the owning data flow resources rather than as separate connection objects.
+
+  - Allow operators to enable or disable retrievers, propagate disabled state to downstream retrievers, grey out affected flows and nodes, and show red warning indicators on affected widget-field dots when disabled upstream flows break those bindings.
+
+  - Allow import and export of whole-diagram pipeline configurations as an archive containing the serialized import or export formats used by the participating data scrapers, data retrievers, data flow resources, and widgets.
+
+  - Let each participating element keep its own serialized import or export format, and use archive composition rather than inventing a separate whole-diagram binding schema.
+
+  - Require widgets to support both full-configuration save or restore and data-flow-resource-only save or restore, with the pipeline editor using only the data-flow-resource-only mode.
+
+  - Allow widgets to consume manual inputs and local or connected data flow resources.
+
+  - Make data scraper, data retriever, data source, and data flow resource support available as early as possible in the implementation phase because multiple widget behaviors depend on them.
 
   - Support template-oriented widgets that render processed data rather than only static content.
 
-  - Support mapping data fields to widget properties without requiring direct code edits.
+  - Support mapping data from data flow resources into widget properties without requiring direct code edits.
 
-  - Support widgets driven by multi-source and service-specific data, such as merged Twitch and YouTube chat, music metadata, and Ulule campaign progress.
+  - Support widgets driven by multi-source and service-specific data flow resources, such as merged Twitch and YouTube chat, music metadata, and Ulule campaign progress.
 
-  - Support in-house processed inputs such as simple mathematical operations, file contents, and command results.
+  - Support in-house processed event pipelines such as simple mathematical operations, watched file contents, and command results.
 
-  - Support external inputs such as third-party APIs and scraped web content, including RSS and Atom feeds.
+  - Support external event pipelines such as third-party APIs, chats, subscriptions, RSS and Atom feeds, and MQTT-like servers.
 
   - Handle missing, stale, or invalid data gracefully.
 
@@ -161,6 +227,8 @@ The longer-term direction is to turn the project into a packaged single executab
   - Represent accepted changes as append-only history entries.
 
   - Support undo through compensating entries rather than destructive rewrites.
+
+  - Treat changes to data scrapers, data retrievers, data flow resources, and their dependencies as history-tracked edits whose propagated downstream effects are also reverted when the originating change is undone.
 
   - Provide enough structured history to support a future audit surface and troubleshooting workflow.
 
@@ -230,9 +298,11 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - The first working surface should feel approachable and should not require code knowledge to begin.
 
-- **Configure widgets and data mappings**: Operators define which widgets appear, how they are arranged, and which inputs drive them.
+- **Configure widgets and data mappings**: Operators choose reusable widgets, create widget instances from them, define how those instances are arranged, and decide which manual inputs or data flow resources drive those widget instances.
 
   - Configuration changes should be understandable, reversible, and safely validated before publication.
+
+  - Event-pipeline configuration should remain legible through a visual flow editor where scrapers originate flows, retrievers derive new flows, and widget-field dots expose field hydration points.
 
 - **Preview and refine presentation**: Operators use preview and sandbox surfaces to validate visual polish, layout, and readability.
 
@@ -250,13 +320,17 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - Missing or stale data should fall back gracefully rather than breaking the preview or render output.
 
-- Non-renderable widgets should remain configurable and visible in the overlay list even when they do not draw directly into the viewport.
+- Non-renderable widget instances should remain configurable and visible in the overlay list even when they do not draw directly into the viewport.
 
 - Widgets that can alter overlay state or active-overlay selection should be permission-gated and auditable.
 
 - Widget configurations should validate before publication.
 
-- File, command, API, and feed-backed widgets should fail safely when their data sources are unavailable or malformed.
+- Widgets backed by local or external event pipelines should fail safely when their data scrapers, data retrievers, data sources, or data flow resources are unavailable or malformed.
+
+- Importing or activating an overlay should surface missing widgets from the overlay dependency list clearly and still allow the user to continue when partial recovery is acceptable.
+
+- Widget export should include the saveable output exposed by each widget resource rather than assuming one universal storage format.
 
 - No-op updates should not create meaningless history entries.
 
@@ -280,13 +354,21 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - Flexible widget and data composition matters more than any one sandbox layout.
 
+- A dynamic Sankey or alluvial-style pipeline editor can make scrapers, multi-source data-retriever subscriptions, derived downstream data sources, and widget-field hydration dots legible in the admin surface.
+
+- Widget-instance stickers or cards below the diagram can keep data-flow-resource dots visually grouped by widget ownership and reduce placement ambiguity.
+
+- Disabled flows and retriever nodes should grey out clearly, while affected widget-field dots should carry explicit warning signals.
+
+- Accessible semi-random colors that remain stable per user can improve flow recognition without turning color choice into a primary operator task.
+
 - Fast feedback for changes, validation, and recovery actions reduces ambiguity.
 
 - Reset and undo affordances reduce fear of experimentation.
 
 ## 6. Narrative
 
-A streamer wants to assemble an on-brand set of stream enhancements before going live because the show context, data sources, and visual priorities change from session to session. They open NEXIS locally, start from a reusable configuration, configure widgets and data mappings, refine the presentation in preview, and publish a render-safe output for streaming software able to compose a web source. The tool works for them because it keeps composition, preview, recovery, and future synchronization in one local workflow instead of scattering those steps across ad hoc edits in streaming software able to compose a web source.
+A streamer wants to assemble an on-brand set of stream enhancements before going live because the show context, upstream event data, and visual priorities change from session to session. They open NEXIS locally, start from a reusable configuration, configure widgets and data mappings, refine the presentation in preview, and publish a render-safe output for streaming software able to compose a web source. The tool works for them because it keeps composition, preview, recovery, and future synchronization in one local workflow instead of scattering those steps across ad hoc edits in streaming software able to compose a web source.
 
 ## 7. Success metrics
 
@@ -332,6 +414,10 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - Future WebSocket or similar push-based synchronization for admin-to-render propagation.
 
+- Future external platform adapters for Discord, Twitch, YouTube, PeerTube, ActivityPub, TikTok, PayPal, and Tipeee or TipeeeStream.
+
+- Direct D3.js integration for a future admin pipeline visualization or configuration view, without a wrapper layer between React and D3.
+
 - Consumption of `/render/:mode?` routes by streaming software able to compose a web source.
 
 - Local configuration files, TLS assets, and packaged binary bootstrap behavior.
@@ -341,6 +427,8 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 - Store operator-facing configuration and accepted history locally by default.
 
 - Persist only the minimum required configuration state, history, and audit context necessary for product behavior.
+
+- Keep pipeline-editor layout derived from shared element configuration, while allowing local browser storage to retain per-user visual preferences such as stable accessible color assignments or constrained layout nudges.
 
 - Avoid external data transmission by default in the local-first model.
 
@@ -372,6 +460,52 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - Handling HTTPS, certificate, and runtime quirks across host platforms.
 
+### 8.5. Architecture direction
+
+- Use hexagonal architecture principles so the domain and application core stay independent from frameworks, transports, and provider APIs and SDKs.
+
+- Keep domain and application logic free of direct dependencies on React, Bun HTTP, WebSocket, SQLite, filesystem watchers, MQTT clients, or provider-specific APIs and SDKs.
+
+- Define ports in the core-facing layers for persistence, synchronization, runtime services, and external event ingestion.
+
+- Avoid provider-specific ports in the core. External platform integrations should use a shared plugin contract plus a small set of capability-oriented ports.
+
+- The shared plugin contract should declare plugin identity, configuration, lifecycle, and which capability-oriented ports the plugin supports so new external platform adapters can be added as plugins without changing the core.
+
+- The first capability-oriented ports should cover at least chat events, subscription events, payment events, and social activity events.
+
+- Capability-oriented ports should emit normalized event shapes built on the normalized capability event envelope.
+
+- The normalized event and actor/chat schema guidance below is intentionally concern-level for now, so exact first-class field names can follow real adapter constraints instead of being frozen prematurely.
+
+- The normalized capability event envelope should cover concerns around stable event identity, capability kind, provider and plugin provenance, occurrence and observation timing, and a normalized `sourceContext` reference describing where the event happened.
+
+- The initial chat events shape should cover concerns around an observed actor account, message payload, a `sourceContext` field carrying normalized chat source context, message kind, reply linkage, and moderation or visibility state where relevant.
+
+- The normalized actor account reference should cover concerns around provider-account-scoped identification, provider-native identification, actor kind, presentation-oriented account fields, role or verification signals when relevant, and an optional canonical actor identity link.
+
+- The canonical actor identity reference should cover concerns around stable NEXIS identity identification, identity kind, presentation fields, and the ability to aggregate multiple provider accounts without collapsing the observed account carried by the event.
+
+- The normalized chat source context should cover concerns around stable chat-context identification, context kind, required room-level context, and optional higher-level space, thread, stream, or owner context.
+
+- Observed actors in normalized capability events should remain provider-account-scoped, while cross-provider matching should happen through canonical actor identity references rather than by merging observed accounts into one event actor record.
+
+- The initial subscription events shape should cover the observed actor account, support kind, tier or level information, tenure or streak information, gifting context when relevant, and an optional support message or note.
+
+- The initial payment events shape should cover the observed actor account when available, payment kind, amount and currency, transaction state, an optional note, and any relevant target or transaction references.
+
+- The initial social activity events shape should cover the observed actor account, activity kind, object or target reference, content summary or payload, audience or visibility context, and related actor accounts where relevant.
+
+- Implement adapters in presentation and infrastructure layers rather than letting those technologies define the core model.
+
+- Treat admin and render surfaces as presentation adapters around the same core model.
+
+- Treat Discord, Twitch, YouTube, PeerTube, ActivityPub, TikTok, PayPal, and Tipeee or TipeeeStream as external platform adapters around the core rather than as domain-defining concepts.
+
+- Let external platform adapters feed data scrapers or adjacent ingestion paths that create single-domain data sources, which data retrievers can then turn into additional data sources before data flow resources expose widget-usable data.
+
+- Let new external platform adapters be added by implementing the shared plugin contract and any relevant capability-oriented ports, rather than requiring new provider-named ports in the core.
+
 ## 9. Milestones & sequencing
 
 ### 9.1. Project estimate
@@ -388,7 +522,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - **Phase 1**: Expand shared-state surfaces beyond the current sandbox and foundation work (2-3 weeks)
 
-  - Key deliverables: projected render route, improved admin shell behavior, additional selector-driven integrations
+  - Key deliverables: data scraper, data retriever, data source, and data flow resource foundations, projected render route, improved admin shell behavior, additional selector-driven integrations
 
 - **Phase 2**: Add history and audit product surfaces (1-2 weeks)
 
@@ -448,11 +582,13 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - **Acceptance criteria**:
 
-  - I can add supported widgets or modules to the current configuration.
+  - I can create widget instances from widgets that are available in the admin interface.
 
-  - I can configure renderable widgets and also keep non-renderable widgets in the overlay definition when they serve a supporting role.
+  - I can configure reusable widget settings separately from widget-instance-specific overlay settings.
 
-  - I can edit the main settings for each widget without direct code changes.
+  - I can configure renderable widget instances and also keep non-renderable widgets available as reusable sources when they serve a supporting role.
+
+  - I can edit the main settings for reusable widgets and widget instances without direct code changes.
 
   - Invalid widget configurations are rejected or surfaced clearly.
 
@@ -466,33 +602,65 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - **Acceptance criteria**:
 
-  - I can reorder widgets or modules within the current configuration.
+  - I can reorder widget instances or modules within the current configuration.
 
-  - I can enable, disable, or hide widgets without deleting them.
+  - I can enable, disable, or hide widget instances without deleting them.
 
   - Layout and visibility changes are reflected in preview before publication.
 
   - The resulting composition remains stable across refresh or reload after persistence is implemented.
 
-### 10.5. Provide manual or connected data inputs
+### 10.5. Provide manual inputs or event-driven widget data
 
 - **ID**: US-005
 
-- **Description**: As a streamer, I want widgets to consume manual inputs or connected data so that the enhancement output can reflect the current context.
+- **Description**: As a streamer, I want widgets to consume manual inputs or data flow resources built from event streams so that the enhancement output can reflect the current context.
 
 - **Acceptance criteria**:
 
-  - I can supply manual data for widgets when no live source is connected.
+  - I can supply manual input for widgets when no live data flow resource is connected.
 
-  - Widgets can consume in-house processed data such as simple mathematical operations, file contents, or command results.
+  - Data scrapers can collect and format events from local processing, watched file contents, commands, APIs, RSS or Atom feeds, or external event streams such as MQTT, and create exactly one single-domain data source from those events.
 
-  - The system can map widget properties to future connected data inputs.
+  - The data source created by a scraper contains events from a single coherent event domain, such as chat-message events or follow-notification events.
 
-  - Widgets can consume external inputs such as third-party APIs or scraped RSS and Atom feeds.
+  - Data retrievers can subscribe to one or more data sources in a non-destructive way, always depend on at least one upstream data source, and always produce exactly one new downstream data source.
 
-  - Missing, stale, or invalid data does not crash the preview or render output.
+  - I can enable or disable data scrapers from the visual flow editor.
 
-  - Widgets surface a predictable fallback state when valid data is unavailable.
+  - I can add data retrievers that sit on one flow or across multiple flows and route upstream flows into them.
+
+  - Data-retriever node placement is calculated dynamically from its current upstream and downstream dependencies, with a default midpoint placement between those dependency boundaries rather than being saved on the retriever itself.
+
+  - Clicking a retriever node opens a modal dialog where I can create, edit, or delete that retriever.
+
+  - I can import or export an individual retriever configuration using that retriever's own serialized format.
+
+  - The visual flow editor is the primary UI for configuring event-driven widget hydration, even though the visible diagram is derived from persisted element configurations rather than stored separately.
+
+  - I can inspect and configure data sources and data retrievers through a visual flow editor in the admin surface, where retrievers create new downstream flows without consuming the upstream ones.
+
+  - Data flow resources can listen to data source events, extract or transform those events into widget-usable values, and provide those values to widgets.
+
+  - Only widget fields backed by data flow resources participate in the visual flow editor.
+
+  - I can browse and search the current widget-instance list below the diagram, showing only widget instances that expose at least one data flow resource field and representing each such field as a dot.
+
+  - I can place widget-field dots directly on the relevant flows so I can configure bindings that determine which field is hydrated from which data source, and the represented data flow resource then ingests events from that flow with the binding identifier persisted on that resource rather than as a separate connection object.
+
+  - Disabling a retriever disables the downstream retrievers that depend on it, greys out the affected flows and nodes, and places red warning indicators on affected widget-field dots.
+
+  - I can import or export a whole-diagram pipeline configuration as an archive of the participating elements' own serialized formats.
+
+  - When pipeline import or export involves widgets, the diagram-side operation uses only the widgets' data-flow-resource-only save or restore mode rather than their full-configuration save or restore mode.
+
+  - The system can map widget properties to local or connected data flow resources.
+
+  - Undoing a pipeline-configuration change also reverts the downstream enable or disable effects that change triggered.
+
+  - Missing, stale, or invalid upstream event data does not crash the preview or render output.
+
+  - Widgets surface a predictable fallback state when valid upstream event data is unavailable.
 
 ### 10.6. Preview the current enhancement state live
 
@@ -669,4 +837,36 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
   - Unauthorized widgets cannot mutate protected overlay-selection behavior.
 
   - Widget-triggered overlay changes are auditable through the same history model used for other accepted changes.
+
+### 10.17. Import or export a widget
+
+- **ID**: US-017
+
+- **Description**: As a streamer or designer, I want to export a configured widget and import it later so that I can reuse it across overlays or share it outside the application.
+
+- **Acceptance criteria**:
+
+  - I can export a widget as a zip package.
+
+  - The export includes the widget configuration and whatever saveable output each widget resource exposes.
+
+  - I can import a compatible widget package through the admin interface.
+
+  - An imported widget becomes available for creating new widget instances.
+
+### 10.18. Import or activate an overlay when some required widgets are unavailable
+
+- **ID**: US-018
+
+- **Description**: As a streamer, I want to see the overlay dependency list for an overlay before importing or activating it so that I can understand what is missing and still choose whether to continue.
+
+- **Acceptance criteria**:
+
+  - The overlay configuration shows its overlay dependency list.
+
+  - Importing or activating an overlay presents the overlay dependency list before proceeding.
+
+  - Missing widgets from that list are clearly identified.
+
+  - I can continue importing or activating the overlay even when some widgets are unavailable.
 

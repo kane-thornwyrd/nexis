@@ -31,6 +31,21 @@ When making significant codebase changes in this repository:
 - Add an entry for each significant change made to the codebase.
 - For each entry, include a concise summary of the change and a short explanation of the goal behind it.
 
+When evolving the domain model or domain vocabulary in this repository:
+
+- Maintain `GLOSSARY.md` at the repository root as the source of truth for the domain glossary.
+- Keep `GLOSSARY.md` easy to browse with stable section anchors and internal links when practical.
+- When adding, renaming, or reclassifying glossary entries, keep the browse sections synchronized with the corresponding headings.
+- Prefer updating `GLOSSARY.md` instead of leaving domain terminology only in chat responses.
+
+When laying out new architecture or moving code across layers in this repository:
+
+- Prefer hexagonal architecture principles.
+- Keep domain and application code independent from React, Bun HTTP, WebSocket, SQLite, filesystem watchers, MQTT clients, and provider-specific APIs and SDKs.
+- Define ports in core-facing layers and implement adapters in presentation or infrastructure layers.
+- Avoid provider-specific ports in the core; prefer a shared plugin contract plus capability-oriented ports.
+- Treat Discord, Twitch, YouTube, PeerTube, ActivityPub, TikTok, PayPal, and Tipeee or TipeeeStream as external platform adapters rather than domain concepts.
+
 When working in this repository:
 
 - Changes to `tasks.md` are always pre-approved.

@@ -2,9 +2,8 @@
 
 ## In Progress
 
-
-
 ## To Do
+- [ ] Introduce data scraper, data retriever, data source, and data flow resource foundations as early as possible in the implementation phase
 - [ ] Harden the first event-sourced state milestone around a future admin flow
 - [ ] Expand focused tests around replay, undo, and selector-driven projections
 - [ ] Drive `/render/:mode?` from projected `AppState` instead of an empty placeholder
@@ -13,6 +12,12 @@
 
 
 ## Backlog
+- [ ] Implement the shared external platform plugin contract in the core-facing layers
+- [ ] Implement the first capability-oriented ports for chat events, subscription events, payment events, and social activity events
+- [ ] Implement and iteratively refine the normalized capability event envelope and the first capability-event shapes with real adapter constraints
+- [ ] Implement canonical actor identity references and actor-account-to-identity linking across providers
+- [ ] Implement an admin data-pipeline editor as the primary event-driven configuration UI with stable ids, dependency-derived midpoint retriever placement, element-owned binding identifiers, local visual preferences, scraper toggles, retriever nodes, widget-instance stickers, widget-field dots placed directly on flows, downstream warnings, history-safe undo, and import/export for individual retriever configurations or whole-diagram pipeline configurations using direct D3.js integration
+- [ ] Implement external platform adapters for Discord, Twitch, YouTube, PeerTube, ActivityPub, TikTok, PayPal, and Tipeee or TipeeeStream against that shared contract
 - [ ] Persist linear history to SQLite through the Bun backend
 - [ ] Decide the backend API and real-time transport shape for local-first synchronization
 - [ ] Add config and database bootstrap behavior for the packaged single executable
@@ -20,6 +25,40 @@
 
 
 ## Done
+- [x] Run a behavior-preserving post-validation cleanup pass on the archive-based pipeline import/export and widget save/restore docs
+- [x] Document archive-based pipeline import/export and dual widget save/restore modes
+- [x] Run a behavior-preserving post-validation cleanup pass on the derived admin pipeline-editor docs after the midpoint-placement and element-owned binding-identifier refinement
+- [x] Document the stronger derived admin pipeline-editor model with stable ids, dependency-derived midpoint retriever placement, element-owned binding identifiers, local visual preferences, and history-safe undo
+- [x] Tighten remaining pipeline-editor terminology drift after the direct-on-flow widget-field-dot clarification
+- [x] Clarify that widget-field dots are placed directly on flows in the admin pipeline editor
+- [x] Run a behavior-preserving post-validation cleanup pass on the richer admin alluvial-diagram pipeline workflow docs
+- [x] Document the richer admin alluvial-diagram pipeline workflow, retriever nodes, widget-field dots, bindings, and downstream warnings
+- [x] Run a behavior-preserving post-validation cleanup pass on the multi-source data-retriever subscription and admin data-pipeline visualization/configuration docs
+- [x] Document multi-source data-retriever subscriptions and the admin data-pipeline visualization and configuration concept
+- [x] Tighten the data-scraper boundary so each scraper creates exactly one single-domain data source
+- [x] Run a behavior-preserving post-validation cleanup pass on the single-domain data-source refinement docs
+- [x] Refine the event pipeline so data scrapers create single-domain data sources and data retrievers derive new downstream data sources from upstream data sources
+- [x] Tighten concern-level wording across the normalized event and actor/chat schema docs after the schema rollback
+- [x] Step normalized event and actor/chat schema docs back to concern-level guidance
+- [x] Tighten actor-account and canonical-identity terminology across the glossary, PRD, changelog, and task tracker
+- [x] Refine the actor model so normalized events keep observed provider accounts separate from canonical identities
+- [x] Run a behavior-preserving post-validation cleanup pass on the normalized actor account reference and chat source context docs
+- [x] Define the normalized actor account reference, canonical actor identity reference, and normalized chat source context for chat events
+- [x] Run a behavior-preserving post-validation cleanup pass on the normalized capability event docs
+- [x] Define the normalized capability event envelope and the first normalized event shapes for the capability-oriented ports
+- [x] Run a behavior-preserving post-validation cleanup pass on the shared plugin contract docs
+- [x] Document the shared external platform plugin contract and the first capability-oriented ports
+- [x] Tighten shared plugin contract terminology across the architecture docs
+- [x] Refine the adapter architecture so external platform adapters share a plugin contract and capability-oriented ports
+- [x] Run a behavior-preserving post-validation cleanup pass on the hexagonal architecture and external platform adapter docs
+- [x] Define hexagonal architecture guidance and the external platform adapter catalog
+- [x] Define the final data scraper, data retriever, data source, and data flow resource model
+- [x] Run a scoped post-validation cleanup pass on the event-pipeline vocabulary docs
+- [x] Tighten residual terminology drift across the glossary, PRD, changelog, and task tracker after the data flow resource rename
+- [x] Replace the older overloaded data source umbrella concept with data flow resource and prioritize its early implementation
+- [x] Refine the widget, widget instance, widget resource, and overlay dependency terminology
+- [x] Run a behavior-preserving post-validation cleanup pass on the glossary tracking files
+- [x] Create a root GLOSSARY.md for domain concepts and keep it browsable with links and a domain map
 - [x] Publish the first release with a loud not-usable-yet warning and correct first-tag versioning
 - [x] Run a behavior-preserving cleanup pass on the release upload packaging files
 - [x] Fix the failed first-release upload by packaging blocked executable assets before publish

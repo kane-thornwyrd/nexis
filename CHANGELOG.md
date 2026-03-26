@@ -6,7 +6,59 @@ This file tracks significant changes to the codebase and the goal behind each ch
 
 Add new entries in reverse chronological order.
 
+### 2026-03-26
+- Tightened the archive-based pipeline import/export and widget save/restore wording so the glossary, PRD, changelog, and task tracker consistently describe whole-diagram pipeline-configuration archives, full-configuration widget save/restore, and pipeline import/export using the data-flow-resource-only widget mode.
+  Goal: reduce terminology drift after the archive-based pipeline import/export documentation pass without changing the intended pipeline behavior.
+- Documented that pipeline import or export uses an archive of the participating elements' own serialized formats, and that widgets expose both full-configuration and data-flow-resource-only save or restore modes with the pipeline editor using the latter.
+  Goal: avoid inventing a separate binding wire format while keeping widget-level export behavior explicit for diagram-driven configuration.
+- Tightened the derived admin pipeline-editor wording so default retriever placement is consistently described as a dependency-derived midpoint, whole-diagram import/export is consistently described as pipeline configuration, binding persistence is described as element-owned identifiers rather than separate connection objects, and per-user visual preferences use stable accessible color assignments.
+  Goal: reduce residual terminology drift after the derived-model documentation pass without changing the intended pipeline-editor behavior.
+- Documented the derived admin pipeline-editor model more precisely: stable ids for diagram-addressable elements, dependency-derived midpoint retriever placement, primary-UI status for event-driven configuration, element-owned binding identifiers, per-user local visual preferences, and history-safe undo of propagated downstream effects.
+  Goal: capture the pipeline editor as a faithful view over persisted element configuration rather than a separate saved diagram model.
+- Tightened the remaining admin pipeline-editor wording so data flow resources are consistently described as widget-field-dot-backed listeners that extract or transform events into widget-usable values, and aligned the implementation tracker with direct-on-flow bindings.
+  Goal: reduce residual terminology drift after the direct-on-flow widget-field-dot clarification without changing the intended admin pipeline workflow.
+- Clarified that widget-field dots in the admin alluvial-diagram workflow are placed directly on flows, so the represented data flow resource ingests events from the flow the dot is placed on.
+  Goal: remove ambiguity between direct-on-flow placement and separate wiring interactions in the pipeline editor model.
+- Tightened the richer admin alluvial-diagram workflow wording across the glossary, PRD, changelog, and task tracker so bindings, widget-instance scope, and individual retriever versus whole-diagram pipeline configuration import/export stay aligned.
+  Goal: reduce terminology drift after the workflow-doc expansion without changing the intended admin pipeline behavior.
+- Documented the richer admin alluvial-diagram pipeline workflow: scrapers as flow origins, retrievers as configurable nodes, widget-field dots as data flow resources, downstream disable warnings, and retriever or whole-diagram pipeline configuration import and export.
+  Goal: turn the earlier pipeline-visualization direction into a concrete admin workflow for configuring and inspecting event-driven widget hydration.
+- Clarified that data retrievers can subscribe to multiple upstream data sources non-destructively, and documented the admin pipeline visualization direction as a dynamic Sankey or alluvial view with direct D3.js integration.
+  Goal: make multi-source pipeline derivations understandable and configurable in the admin surface without hiding the actual flow topology.
+- Refined the data-scraper definition so each scraper creates exactly one single-domain data source.
+  Goal: keep scraper boundaries explicit enough that chat, follows, and similar upstream domains do not get bundled into ambiguous mixed sources.
+- Tightened the glossary, PRD, changelog, and task tracker wording so overlay-scoped behavior consistently refers to widget instances, data flow resources are described as widget-facing listeners on data sources, and the latest event-pipeline tracking copy names upstream data sources explicitly.
+  Goal: reduce residual terminology drift after the data-source creation refinement without changing the intended event-pipeline model.
+- Refined the event-pipeline vocabulary so data scrapers create single-domain data sources directly, while data retrievers listen to one or more upstream data sources and derive new downstream data sources.
+  Goal: align the terminology with the intended pipeline shape before implementation starts hardening around the wrong source-creation boundary.
+- Stepped the normalized capability event envelope and actor/chat subshape docs back from exact low-level field lists to concern-level guidance.
+  Goal: avoid premature schema lock-in while keeping the normalization model and invariants clear enough for early implementation.
+- Tightened the glossary and PRD wording so the normalized event and actor/chat schema guidance stays explicitly concern-level, and aligned the tracking terminology around actor/chat schema.
+  Goal: reduce terminology drift after the schema-doc rollback without reintroducing fixed low-level field lists.
+- Refined the actor model so normalized capability events use provider-account-scoped normalized actor account references with optional canonical actor identity references for cross-provider matching, instead of treating observed actor accounts as already person-level identities.
+  Goal: keep event provenance precise while allowing multiple provider accounts to resolve to the same person or entity in NEXIS.
+
+### 2026-03-25
+- Documented the normalized actor account reference and normalized chat source context for chat events, and made the chat event shape use `sourceContext` as the canonical field for chat source context instead of a separate `roomContext` concept.
+  Goal: reduce overlap in the chat event schema and give adapters one precise actor-account shape and one chat-source-context shape to normalize against.
+- Documented the initial normalized capability event envelope and the first normalized event shapes for the chat events, subscription events, payment events, and social activity events capability ports.
+  Goal: give future core ports and external platform adapters a shared event shape to implement instead of normalizing payloads ad hoc.
+- Documented the shared external platform plugin contract in the glossary and PRD with identity, configuration, lifecycle, and declarations of which capability-oriented ports a plugin supports, and documented the first capability-oriented ports for chat events, subscription events, payment events, and social activity events.
+  Goal: give future plugin and adapter implementation a concrete shared contract instead of only an abstract architectural preference.
+- Refined the hexagonal-architecture guidance so external platform integrations use a shared plugin contract and capability-oriented ports instead of introducing provider-specific ports in the core.
+  Goal: keep new platform adapters extensible without baking provider names into the core architecture.
+- Added explicit hexagonal architecture guidance to the glossary, PRD, and repo instructions, and documented a first catalog of external platform adapters for Discord, Twitch, YouTube, PeerTube, ActivityPub, TikTok, PayPal, and Tipeee or TipeeeStream.
+  Goal: make dependency direction explicit and keep provider-specific adapters outside the core model as the project grows.
+- Defined the event-pipeline model more precisely by introducing data scrapers, data retrievers, and data sources as distinct glossary and PRD concepts, clarifying that data flow resources are widget-facing listeners on data sources rather than source creators.
+  Goal: give implementation a stable event-ingestion and event-distribution vocabulary instead of overloading data flow resources with upstream retrieval responsibilities.
+- Replaced the older overloaded `data source` umbrella term with `data flow resource` across the glossary and PRD, merged that old umbrella definition into the new resource concept, and moved data flow resource foundations earlier in the implementation roadmap.
+  Goal: align the vocabulary with the widget-resource model and make data flow resources available early enough for dependent widget behaviors.
+
 ### 2026-03-24
+- Refined the widget vocabulary in the glossary and PRD by defining widgets as reusable importable and exportable source objects, defining widget instances as overlay-scoped instantiations, introducing widget resources and overlay dependencies, and adding overlay dependency handling plus widget import and export expectations to the product spec.
+  Goal: make the reusable-widget model explicit enough to support future implementation without overloading the old "widget" concept.
+- Added a root `GLOSSARY.md` for the NEXIS domain vocabulary, organized it with browse sections, internal links, and a Mermaid domain map, and added repo instructions to keep future domain-vocabulary changes synchronized with the glossary.
+  Goal: keep domain terminology discoverable and maintainable in the repository instead of letting it drift across chats, instructions, and PRD prose.
 - Fixed the first-release publish path by packaging compiled binaries into safe `.tar.gz` archives before upload, so GitHub release creation no longer fails on blocked raw executable extensions such as `.app` and `.exe`.
   Goal: make the first release publish end-to-end instead of failing after the tag is created.
 - Tightened the release-upload packaging follow-up pass by deduplicating trimmed asset-path lists during packaging and routing the packaging command through `package.json`, so the workflow and docs share one entrypoint.
@@ -52,7 +104,7 @@ Add new entries in reverse chronological order.
   Goal: anchor future product decisions on the actual stream-overlay domain instead of generic dashboard assumptions.
 - Clarified the widget domain concept in the PRD as a positionable overlay element that can be renderable or non-renderable, data-driven from local or external sources, and optionally permissioned to alter overlay behavior.
   Goal: make future planning treat widgets as first-class domain objects rather than as generic UI components.
-- Added a first-pass PRD domain model section defining overlay, widget, data source, template, viewport placement, and permission.
+- Added a first-pass PRD domain model section defining overlay, widget, the then-current overloaded `data source` umbrella concept later refined into `data flow resource` plus a narrower `data source` event-stream term, template, viewport placement, and permission.
   Goal: give future product, architecture, and UX work a stable shared vocabulary instead of relying on scattered prose definitions.
 - Expanded focused Bun coverage for process lifecycle management, server port resolution, app-state reducers and factories, shared helpers, selectors, and history edge cases.
   Goal: protect the highest-risk pure logic with direct regression tests and reduce the chance of silent behavior drift.
