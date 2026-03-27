@@ -134,7 +134,8 @@
        y1="233.85669"
        x2="558.98218"
        y2="407.85669"
-       gradientUnits="userSpaceOnUse" /><filter
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.038901,0,0,1.038901,-7.253814,-13.019126)" /><filter
        inkscape:collect="always"
        style="color-interpolation-filters:sRGB"
        id="filter5982"
@@ -168,27 +169,32 @@
        width="640"
        height="640"
        x="0"
-       y="0" /><path
-       id="text99-6"
-       style="font-size:110.667px;font-family:Orbitron;-inkscape-font-specification:'Orbitron, @wght=900';font-variation-settings:'wght' 900;text-align:center;white-space:pre;mix-blend-mode:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:16.0356;stroke-opacity:1;paint-order:markers stroke fill;filter:url(#filter5982)"
-       d="M 15.674654,265.15278 V 423.87391 H 50.274 V 317.61756 l 90.40284,106.25635 h 35.71226 113.17562 16.61611 l 44.19702,-52.02456 44.64341,52.02456 h 35.93856 32.63704 v 0.0159 H 615.67465 V 388.62082 L 513.86682,299.3402 H 615.67465 V 265.16865 H 464.51138 v -0.0159 h -33.55156 -35.93856 l -44.19701,52.24471 -44.64342,-52.24468 H 289.56472 141.12636 V 370.70545 L 51.39001,265.15278 Z m 414.683756,13.8908 V 411.26614 L 373.37069,344.51336 Z M 176.3891,299.54133 h 113.1012 l 38.12098,44.97203 -38.11786,44.96893 H 176.3891 v -27.77622 h 91.07865 V 327.31753 H 176.3891 Z m 288.12228,1.69883 100.47169,88.04061 H 464.51138 Z"
-       sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccccccccccccc"
-       inkscape:label="text99-6" /><rect
-       style="font-variation-settings:'wght' 900;mix-blend-mode:normal;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:5;stroke-dasharray:none;stroke-opacity:1;filter:url(#filter5983)"
-       id="rect5952-1"
-       width="40"
-       height="40"
-       x="188"
-       y="-467"
-       transform="rotate(90,-2.7499999,1.75)" /><path
-       id="text99"
-       style="font-size:110.667px;font-family:Orbitron;-inkscape-font-specification:'Orbitron, @wght=900';font-variation-settings:'wght' 900;text-align:center;white-space:pre;fill:#171717;fill-opacity:1;stroke:url(#linearGradient5949);stroke-width:16.0356;stroke-opacity:1;paint-order:markers stroke fill"
-       d="M 15,240.6315 V 399.35263 H 49.599346 V 293.09628 l 90.402844,106.25635 h 35.71226 113.17562 16.61611 l 44.19702,-52.02456 44.64341,52.02456 h 35.93856 32.63704 v 0.0159 H 615 V 364.09954 L 513.19217,274.81892 H 615 V 240.64737 H 463.83673 v -0.0159 H 430.28517 394.34661 L 350.1496,292.87618 305.50618,240.6315 H 288.89007 140.45171 V 346.18417 L 50.715356,240.6315 Z m 414.68376,13.8908 v 132.22256 l -56.98772,-66.75278 z m -253.96931,20.49775 h 113.1012 l 38.12098,44.97203 -38.11786,44.96893 H 175.71445 v -27.77622 h 91.07865 v -34.38854 h -91.07865 z m 288.12228,1.69883 100.47169,88.04061 H 463.83673 Z"
-       sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccccccccccccc" /><rect
-       style="font-variation-settings:'wght' 900;fill:#6b21a8;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:5;stroke-dasharray:none;stroke-opacity:1"
-       id="rect5952"
-       width="40"
-       height="40"
-       x="185.01756"
-       y="-466.58817"
-       transform="rotate(90)" /></g></svg>
+       y="0" /><g
+       id="g5985"
+       transform="matrix(0.8620781,0,0,0.8620781,43.538448,43.36857)"><g
+         id="g5984"><path
+           id="text99-6"
+           style="font-size:110.667px;font-family:Orbitron;-inkscape-font-specification:'Orbitron, @wght=900';font-variation-settings:'wght' 900;text-align:center;white-space:pre;mix-blend-mode:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:16.0356;stroke-opacity:1;paint-order:markers stroke fill;filter:url(#filter5982)"
+           d="M 15.674654,265.15278 V 423.87391 H 50.274 V 317.61756 l 90.40284,106.25635 h 35.71226 113.17562 16.61611 l 44.19702,-52.02456 44.64341,52.02456 h 35.93856 32.63704 v 0.0159 H 615.67465 V 388.62082 L 513.86682,299.3402 H 615.67465 V 265.16865 H 464.51138 v -0.0159 h -33.55156 -35.93856 l -44.19701,52.24471 -44.64342,-52.24468 H 289.56472 141.12636 V 370.70545 L 51.39001,265.15278 Z m 414.683756,13.8908 V 411.26614 L 373.37069,344.51336 Z M 176.3891,299.54133 h 113.1012 l 38.12098,44.97203 -38.11786,44.96893 H 176.3891 v -27.77622 h 91.07865 V 327.31753 H 176.3891 Z m 288.12228,1.69883 100.47169,88.04061 H 464.51138 Z"
+           sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccccccccccccc"
+           inkscape:label="text99-6" /><path
+           id="text99"
+           style="font-size:110.667px;font-family:Orbitron;-inkscape-font-specification:'Orbitron, @wght=900';font-variation-settings:'wght' 900;text-align:center;white-space:pre;fill:#171717;fill-opacity:1;stroke:url(#linearGradient5949);stroke-width:16.6594;stroke-opacity:1;paint-order:markers stroke fill"
+           d="M 8.3297005,236.97318 V 401.86872 H 44.274996 V 291.47889 L 138.1946,401.86872 h 37.1015 117.57827 17.26249 l 45.91633,-54.04837 46.38008,54.04837 h 37.33661 33.90665 v 0.0165 H 631.6703 V 365.24425 L 525.90204,272.49053 H 631.6703 V 236.98967 H 474.62663 v -0.0165 h -34.85675 -37.33661 l -45.91632,54.27706 -46.38009,-54.27705 H 292.87437 138.66161 V 346.63196 L 45.434419,236.97318 Z M 439.14507,251.40435 V 388.7705 l -59.2046,-69.34953 z M 175.2961,272.69948 h 117.50095 l 39.60393,46.72149 -39.60069,46.71826 H 175.2961 v -28.85674 h 94.6217 V 301.5562 h -94.6217 z m 299.33053,1.76492 104.38014,91.46547 H 474.62663 Z"
+           sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccccccccccccc" /></g><g
+         id="g5983"
+         transform="translate(0.99999997,-85.999997)"><rect
+           style="font-variation-settings:'wght' 900;mix-blend-mode:normal;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:5;stroke-dasharray:none;stroke-opacity:1;filter:url(#filter5983)"
+           id="rect5952-1"
+           width="40"
+           height="40"
+           x="188"
+           y="-467"
+           transform="rotate(90,-36.749999,44.749999)" /><rect
+           style="font-variation-settings:'wght' 900;fill:#6b21a8;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:5;stroke-dasharray:none;stroke-opacity:1"
+           id="rect5952"
+           width="40"
+           height="40"
+           x="262.01755"
+           y="-475.58817"
+           transform="rotate(90)" /></g></g></g></svg>
