@@ -7,6 +7,20 @@ This file tracks significant changes to the codebase and the goal behind each ch
 Add new entries in reverse chronological order.
 
 ### 2026-03-27
+- Added the direct `releases/latest` GitHub link to the end-user README so streamers can jump straight to the newest packaged release notes and downloads.
+  Goal: reduce friction between discovering NEXIS and actually reaching the latest packaged build.
+- Tightened the README and developer guide wording by removing a duplicated README status section and aligning the developer guide with the executable-first user-facing messaging.
+  Goal: reduce small wording drift between the end-user and Bun-focused documentation without changing project guidance.
+- Reoriented the main README toward streamers and end users, moved Bun/dev workflow details into `DEVELOPER_README.md`, and rewrote the public-facing README tone around the product's value and direction.
+  Goal: make the front page sell the product vision to creators instead of reading like internal development notes.
+- Tightened the icon-first-action, scraper fake-event, overlay publication-state, and account-linking terminology by promoting overlay revision and credential or auth grant into explicit glossary concepts, aligning the PRD's staging-route wording, and bumping `PRD.md` to `1.0.1` for this non-normative cleanup.
+  Goal: reduce residual terminology drift across the glossary, PRD, changelog, and task tracker without changing the documented product behavior.
+- Defined icon-first UI action guidance, fake-event-capable data scrapers, overlay-specific staging and live routes, and secure account-linking requirements with OAuth2-style guidance where supported, and bumped `PRD.md` to `1.0.0` for this incompatible route and workflow change.
+  Goal: make operator workflows more testable and ergonomic while separating staged overlay validation from live render output and clarifying how upstream account access should be linked and secured.
+- Tightened the executable-first onboarding and packaged-runtime local HTTPS wording by defining the local TLS asset term in the glossary, removing a duplicate packaged-runtime bootstrap user-story description, normalizing the TLS asset phrasing across the tracker and requirements, and bumped `PRD.md` to `0.5.1` for this non-normative cleanup.
+  Goal: reduce small terminology drift around packaged-runtime HTTPS bootstrap without changing the documented onboarding or local HTTPS behavior.
+- Documented executable-first onboarding for end users, kept `bun dev` as a developer-oriented workflow, added automatic local HTTPS bootstrap requirements for packaged runtime startup, and bumped `PRD.md` to `0.5.0` for this additive requirements expansion.
+  Goal: make the first-time-user path center on the bundled executable while removing manual TLS certificate generation as an expected user responsibility.
 - Tightened the source-available licensing docs so the README, license notice, commercial-licensing note, and contributing guide consistently use the full PolyForm license name and the same public-license wording.
   Goal: reduce small terminology drift across the new licensing files without changing the project's licensing model or contribution flow.
 - Added a source-available licensing setup around the PolyForm Noncommercial License 1.0.0, a commercial-licensing note, a DCO-based contributing guide, and a README License section.

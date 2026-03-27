@@ -57,6 +57,7 @@ It distinguishes between:
 - [Serialized format version](#serialized-format-version)
 - [Transform](#transform)
 - [Credential or auth grant](#credential-or-auth-grant)
+- [Local TLS asset](#local-tls-asset)
 - [Validation issue](#validation-issue)
 - [Trigger or automation rule](#trigger-or-automation-rule)
 - [Capability policy](#capability-policy)
@@ -694,10 +695,54 @@ What still needs definition:
 Status: underdefined
 
 Current definition:
-- A parameter on the render route.
+- A possible secondary render-detail concept, but no longer the primary route identifier now that overlay-specific `/render/:OVERLAY_ID` and `/staging/:OVERLAY_ID` routes are preferred.
 
 What still needs definition:
-- Whether it is a first-class domain concept with named semantics or just a route implementation detail.
+- Whether it should survive as a first-class domain concept at all or remain only an optional implementation detail beneath overlay-specific routes.
+
+[Back to top](#nexis-domain-glossary)
+
+### Overlay revision and publication state
+
+Status: underdefined
+
+Current definition:
+- Overlay revision and publication state distinguishes an overlay's in-progress, staged, and live states.
+- In the current direction, `/staging/:OVERLAY_ID` exposes the staged revision for validation, while `/render/:OVERLAY_ID` exposes the live revision intended for actual use.
+
+What still needs definition:
+- Whether staged and live should remain the only publication-facing states or whether other explicit states such as archived or scheduled publication should exist later.
+- How promotion between in-progress, staged, and live states should appear in history, audit, and future synchronization behavior.
+
+[Back to top](#nexis-domain-glossary)
+
+### Credential or auth grant
+
+Status: underdefined
+
+Current definition:
+- A credential or auth grant is the stored authorization material that lets a data scraper or external-platform adapter access a user's upstream account or API on that user's behalf.
+- It may represent OAuth2 tokens, API keys, or other provider-specific authorization artifacts.
+- It should be linkable and revocable from the UI, with OAuth2-style authorization preferred when the upstream provider supports it.
+
+What still needs definition:
+- Which metadata beyond the grant material itself should be modeled explicitly, such as provider account identity, granted scopes, expiry, or last-refresh status.
+- How secure storage, renewal, rotation, and revocation failures should surface in operator-facing UX.
+
+[Back to top](#nexis-domain-glossary)
+
+### Local TLS asset
+
+Status: underdefined
+
+Current definition:
+- A local TLS asset is the locally scoped HTTPS key-and-certificate material the packaged runtime uses to serve the local UI over HTTPS on the same machine.
+- The runtime should discover existing local TLS assets in the system folders it uses before offering to generate new ones.
+- When generated automatically, those assets should stay in the system folders used by the application and should be treated as strictly local-machine assets rather than network-facing certificates.
+
+What still needs definition:
+- Whether the term should cover only the private key and certificate pair or also adjacent metadata such as expiry, fingerprint, and generation provenance.
+- How rotation, renewal, replacement, or trust guidance should be surfaced in operator-facing UX.
 
 [Back to top](#nexis-domain-glossary)
 
@@ -712,21 +757,6 @@ Why it is needed:
 
 Candidate role:
 - Main aggregate root for all user-managed configuration.
-
-[Back to top](#nexis-domain-glossary)
-
-### Overlay revision and publication state
-
-Status: missing
-
-Why it is needed:
-- The PRD implies draft, active, and published distinctions but does not name them explicitly.
-
-Candidate states:
-- draft
-- published
-- active
-- archived
 
 [Back to top](#nexis-domain-glossary)
 
@@ -745,15 +775,6 @@ Status: missing
 
 Why it is needed:
 - The system expects derived values, formatting, merging, filtering, and computation before rendering.
-
-[Back to top](#nexis-domain-glossary)
-
-### Credential or auth grant
-
-Status: missing
-
-Why it is needed:
-- External sources will eventually require authentication and secret management.
 
 [Back to top](#nexis-domain-glossary)
 

@@ -6,7 +6,7 @@
 - [ ] Introduce data scraper, data retriever, data source, and data flow resource foundations as early as possible in the implementation phase
 - [ ] Harden the first event-sourced state milestone around a future admin flow
 - [ ] Expand focused tests around replay, undo, and selector-driven projections
-- [ ] Drive `/render/:mode?` from projected `AppState` instead of an empty placeholder
+- [ ] Drive `/render/:OVERLAY_ID` and `/staging/:OVERLAY_ID` from projected `AppState` instead of placeholder routes
 - [ ] Add a history and audit UI that shows command suites and accepted events
 - [ ] Prepare the admin and render UIs for real-time synchronization from a shared domain model
 
@@ -20,11 +20,18 @@
 - [ ] Implement external platform adapters for Discord, Twitch, YouTube, PeerTube, ActivityPub, TikTok, PayPal, and Tipeee or TipeeeStream against that shared contract
 - [ ] Persist linear history to SQLite through the Bun backend
 - [ ] Decide the backend API and real-time transport shape for local-first synchronization
-- [ ] Add config and database bootstrap behavior for the packaged single executable
+- [ ] Add config, local TLS asset bootstrap behavior, and database bootstrap behavior for the packaged single executable
 - [ ] Add replay and snapshot optimization for larger histories
 
 
 ## Done
+- [x] Add the direct latest-release link to the end-user README
+- [x] Run a behavior-preserving post-validation cleanup pass on README.md and DEVELOPER_README.md to reduce wording drift
+- [x] Reorient the README toward end users and move development workflow docs into a dedicated developer guide
+- [x] Run a behavior-preserving post-validation cleanup pass on the icon-first actions, scraper fake events, overlay-specific staging/live routes, and secure account-linking docs
+- [x] Define icon-first UI actions, scraper fake events, overlay-specific render and staging routes, and secure account linking
+- [x] Run a behavior-preserving post-validation cleanup pass on the executable-first onboarding and local TLS asset docs
+- [x] Define executable-first onboarding and automatic local HTTPS bootstrap for the packaged runtime
 - [x] Run a behavior-preserving post-validation cleanup pass on the source-available licensing and contribution docs
 - [x] Tighten the source-available licensing and contribution wording across the README, license note, commercial licensing note, and contributing guide
 - [x] Add the source-available license, commercial licensing note, and DCO-based contributing guide

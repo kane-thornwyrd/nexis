@@ -6,15 +6,15 @@
 
 - NEXIS: the Product Requirements Document
 
-- Version: 0.4.1
+- Version: 1.0.1
 
 ### 1.2 Product summary
 
 NEXIS is a local-first stream enhancer with widgets and data. It is built on Bun, React, and TypeScript and is intended to give streamers a fast local control UI for configuring stream enhancements, previewing output, and delivering future render UIs for streaming software able to compose a web source.
 
-Today the product provides a main admin UI and the first shared-state foundation for local experimentation. The current admin experience can still be used to validate presentation patterns, but it should not be treated as the authoritative source of long-term product functionality.
+Today the product provides a main admin UI and the first shared-state foundation for local experimentation. For almost all end users, the primary entrypoint should be the bundled executable rather than a Bun-driven developer workflow.
 
-The longer-term direction is to turn the project into a packaged single executable that lets users define enhancement configurations, bind widgets to manual inputs and data flow resources, preview the result, publish consistent render UIs, synchronize updates locally, persist state safely, and inspect change history when needed.
+The longer-term direction is to turn the project into a packaged single executable that lets users define enhancement configurations, bind widgets to manual inputs and data flow resources, preview the result, publish consistent render UIs, synchronize updates locally, persist state safely, inspect change history when needed, and serve the local UI over HTTPS with automatically bootstrapped self-signed local TLS assets when none already exist.
 
 ### 1.3 First-pass domain model
 
@@ -24,7 +24,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - **Widget resource**: A reusable resource exposed by a widget. Current examples include visual resources, sound resources, animated resources, and data flow resources. A resource may come from static code, local files, or another resource-specific storage shape, and each resource kind may define how it is saved when the widget is exported.
 
-- **Data scraper**: A source-side ingestion component that collects data from a concrete upstream input, formats that collected data into events, and creates exactly one single-domain data source from those events. That data source should contain events from a single coherent event domain. Typical upstream inputs include local processing, watched file contents, commands, APIs, RSS or Atom feeds, and external event streams such as MQTT.
+- **Data scraper**: A source-side ingestion component that collects data from a concrete upstream input, formats that collected data into events, and creates exactly one single-domain data source from those events. That data source should contain events from a single coherent event domain. Typical upstream inputs include local processing, watched file contents, commands, APIs, RSS or Atom feeds, and external event streams such as MQTT. A scraper should also be able to emit fake events that follow the same downstream event shape so users and developers can test data flows without waiting for live upstream activity.
 
 - **Data retriever**: A selective aggregation component that subscribes to one or more data sources in a non-destructive way, always depends on at least one upstream data source, and always produces exactly one new downstream data source from the resulting derived event stream.
 
@@ -48,6 +48,10 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - **Permission**: An explicit capability granted to a widget. Permissions may allow access to protected inputs or controlled actions, such as altering the current overlay or switching which overlay is displayed.
 
+- **Overlay revision and publication state**: A distinction between in-progress, staged, and live overlay states. In the current direction, `/staging/:OVERLAY_ID` should expose the staged version of an overlay for validation, while `/render/:OVERLAY_ID` should expose the live version intended for actual use.
+
+- **Credential or auth grant**: The stored authorization material that lets a data scraper or external-platform adapter access a user's upstream account or API on that user's behalf. It may represent OAuth2 tokens, API keys, or other provider-specific authorization artifacts, should be linkable and revocable from the UI, and should prefer OAuth2-style authorization when the upstream provider supports it.
+
 ## 2. Goals
 
 ### 2.1 Business goals
@@ -70,6 +74,8 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - Publish a render-safe output that matches the operator-approved preview.
 
+- Link upstream accounts securely when external data scrapers need user authorization.
+
 - Recover safely from mistakes through undo, reset, and future persisted recovery.
 
 - Run the tool locally with minimal setup and predictable behavior.
@@ -84,7 +90,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - Delivering a broad visual redesign unrelated to operator workflows and product direction.
 
-- Treating the current `/render/:mode?` placeholder as the final render experience.
+- Treating the current placeholder render-route implementation as the final render and staging experience.
 
 ## 3. User personas
 
@@ -104,9 +110,11 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - **Visual designers and technical producers**: Need to preview widgets, typography, theme tokens, and UI states quickly while evaluating how the overlay feels in context.
 
-- **Render consumers**: Need stable render routes that reflect the operator-approved projected state without exposing editing controls.
+- **Render consumers**: Need stable overlay-specific render routes that reflect the operator-approved projected state without exposing editing controls.
 
 - **Local maintainers and integrators**: Need to launch, configure, package, and eventually persist the application safely on supported host machines.
+
+- **Plugin developers**: Need a developer-oriented workflow such as `bun dev` while still targeting the same packaged-runtime behavior end users will rely on.
 
 ### 3.3 Role-based access
 
@@ -114,7 +122,9 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - **Render viewers**: Can load render routes intended for viewing output only and should not be able to modify the underlying state.
 
-- **Maintainers**: Can configure runtime behavior, ports, packaging, persistence, and local bootstrap behavior. They may also manage any future access configuration.
+- **Maintainers**: Can configure runtime behavior, ports, packaging, persistence, local bootstrap behavior, and credential or account-linking policies. They may also manage any future access configuration.
+
+- **Plugin developers**: Can use development-oriented workflows, validate plugin behavior against the local app, and rely on the packaged runtime as the target user environment.
 
 - **Guests**: Are not a primary current product role. If public or semi-public routes are introduced later, they should default to read-only behavior.
 
@@ -131,6 +141,28 @@ The longer-term direction is to turn the project into a packaged single executab
   - Display the overlay dependency list for an overlay configuration.
 
   - When a user imports or activates an overlay configuration, present the overlay dependency list and allow the user to continue even if some referenced widgets are unavailable.
+
+- **Packaged runtime bootstrap and local HTTPS** (Priority: High)
+
+  - Treat the bundled executable as the primary launch path for end users, while keeping `bun dev` as a developer-oriented workflow for NEXIS maintainers and plugin authors.
+
+  - Serve the local UI over HTTPS by default in the packaged runtime.
+
+  - Detect whether local TLS assets already exist in the system folders used by the application.
+
+  - If local TLS assets are missing, offer to generate them automatically by using whatever certificate-generation capability is available on the host platform.
+
+  - Store generated local TLS assets in the system folders used by the application.
+
+  - Warn clearly that any auto-generated local TLS certificate is self-signed, intended only for strictly local-machine use, and should not be used to expose the application on any network.
+
+- **UI action ergonomics** (Priority: Medium)
+
+  - Prefer clear icons over always-visible text labels for action buttons where the icon meaning remains understandable.
+
+  - Provide a user preference that allows operators to keep labels visible alongside icons when they prefer a more textual UI.
+
+  - When labels are hidden, require tooltips or equivalent accessible names so actions remain understandable and discoverable.
 
 - **Widget composition and layout** (Priority: High)
 
@@ -164,6 +196,8 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Keep the data source created by a data scraper scoped to a single coherent event domain, such as chat-message events or follow-notification events rather than a mixed upstream bundle.
 
+  - Let data scrapers expose fake-event generation so users and developers can test data flows, widgets, and retrievers without waiting for real upstream events or consuming API credits.
+
   - Use stable persisted identifiers and faithful names for diagram-addressable scrapers, data sources, data retrievers, data flow resources, widgets, and widget instances.
 
   - Allow data retrievers to subscribe to one or more data sources in a non-destructive way, require at least one upstream data source per retriever, and produce exactly one new downstream data source per retriever.
@@ -175,6 +209,8 @@ The longer-term direction is to turn the project into a packaged single executab
   - Compute retriever-node positions dynamically from the data sources they depend on and the next downstream dependency or end of the diagram, with a default midpoint placement between those dependency boundaries rather than persisting retriever positions as part of retriever configuration.
 
   - Allow operators to enable or disable data scrapers from that pipeline editor.
+
+  - Allow operators to trigger scraper-provided fake events from the UI, with those events flowing through the same downstream pipeline paths as live events.
 
   - Allow operators to route upstream flows into retriever nodes and create, update, or delete retrievers through node-driven modal dialogs.
 
@@ -200,6 +236,14 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Allow widgets to consume manual inputs and local or connected data flow resources.
 
+  - Let users link upstream accounts or credentials to data scrapers through the UI, with clear explanations of requested permissions and the resulting access.
+
+  - Prefer OAuth2-style account-linking flows when the upstream provider supports them.
+
+  - Let users revoke linked accounts or credentials from the UI.
+
+  - Store linked-account credentials and grants securely in the system folders used by the application and warn users that those credentials are sensitive.
+
   - Make data scraper, data retriever, data source, and data flow resource support available as early as possible in the implementation phase because multiple widget behaviors depend on them.
 
   - Support template-oriented widgets that render processed data rather than only static content.
@@ -224,11 +268,15 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - **Render delivery** (Priority: High)
 
-  - Drive `/render/:mode?` from the shared projected state rather than an isolated implementation.
+  - Give each overlay its own live route at `/render/:OVERLAY_ID`.
+
+  - Give each overlay its own staging route for validation at `/staging/:OVERLAY_ID`.
+
+  - Drive both route families from the shared projected state rather than from isolated implementations.
 
   - Keep render routes optimized for streaming software able to compose a web source.
 
-  - Support mode-specific render behavior where needed without forking the core model.
+  - Keep the staging route separate from the live route so operators can validate in-progress overlay changes without replacing the live output immediately.
 
 - **State history, undo, and audit** (Priority: High)
 
@@ -284,15 +332,21 @@ The longer-term direction is to turn the project into a packaged single executab
 
 ### 5.1. Entry points & first-time user flow
 
-- Operators start the app locally through `bun dev` or a packaged binary and arrive at the admin shell.
+- End users start the app primarily through the bundled executable and arrive at the admin UI.
+
+- NEXIS maintainers and plugin developers may also use `bun dev`, but that workflow should not be treated as the primary first-time-user path.
 
 - First-time users are guided toward a starter enhancement configuration rather than raw technical controls.
 
-- The main admin UI can be used to evaluate layout, theming, and interaction polish, but it is not the product definition by itself.
+- If no local TLS key and certificate are available, the app offers automatic generation before serving the UI and explains that the generated certificates are self-signed and only suitable for strictly local-machine use.
+
+- The main admin UI is the primary operator-facing product UI.
+
+- When external data scrapers need account access, the UI should guide users through linking those accounts with clear permission explanations and revocation paths.
 
 - Users define or open the current enhancement configuration, connect or enter the data it needs, and preview the result.
 
-- Users can open a render route to validate how the published output will appear in streaming software.
+- Users can open `/staging/:OVERLAY_ID` to validate in-progress overlay changes and `/render/:OVERLAY_ID` to inspect the live output.
 
 - Users discover reset, undo, and future save/load affordances early so experimentation feels safe.
 
@@ -312,11 +366,13 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Event-pipeline configuration should remain legible through a visual flow editor where scrapers originate flows, retrievers derive new flows, and widget-field dots expose field hydration points.
 
+  - When upstream activity is unavailable, scraper-provided fake events should make pipeline and widget behavior testable from the same UI.
+
 - **Preview and refine presentation**: Operators use preview and sandbox UIs to validate visual polish, layout, and readability.
 
   - Visual feedback should feel immediate, stable, and clearly connected to the current enhancement configuration.
 
-- **Publish to render UIs**: Operators open or embed render routes that consume the approved shared state.
+- **Publish to render UIs**: Operators open or embed overlay-specific staging and live routes that consume the approved shared state.
 
   - Render views should remain lightweight, read-only, and suitable for streaming software able to compose a web source.
 
@@ -335,6 +391,8 @@ The longer-term direction is to turn the project into a packaged single executab
 - Widget configurations should validate before publication.
 
 - Widgets backed by local or external event pipelines should fail safely when their data scrapers, data retrievers, data sources, or data flow resources are unavailable or malformed.
+
+- Account-linking flows should explain requested permissions clearly and allow revocation without forcing users into manual secret-file management.
 
 - Importing or activating an overlay should surface missing widgets from the overlay dependency list clearly and still allow the user to continue when partial recovery is acceptable.
 
@@ -357,6 +415,8 @@ The longer-term direction is to turn the project into a packaged single executab
 - Dark-first control-room aesthetic that favors focused operator workflows.
 
 - Preview-first workflow that keeps user intent visible while editing.
+
+- Action-heavy UIs should prefer recognizable icons, while still allowing users to keep visible labels or rely on tooltips.
 
 - Clear separation between editing UIs, visual sandbox UIs, and render-only UIs.
 
@@ -394,7 +454,7 @@ sankey-beta
 
 ## 6. Narrative
 
-A streamer wants to assemble an on-brand set of stream enhancements before going live because the show context, upstream event data, and visual priorities change from session to session. They open NEXIS locally, start from a reusable configuration, configure widgets and data mappings, refine the presentation in preview, and publish a render-safe output for streaming software able to compose a web source. The tool works for them because it keeps composition, preview, recovery, and future synchronization in one local workflow instead of scattering those steps across ad hoc edits in streaming software able to compose a web source.
+A streamer wants to assemble an on-brand set of stream enhancements before going live because the show context, upstream event data, and visual priorities change from session to session. They open NEXIS locally, start from a reusable configuration, link any needed upstream accounts, configure widgets and data mappings, test flows with fake events when live activity is unavailable, refine the presentation in preview and staging, and publish a render-safe live output for streaming software able to compose a web source. The tool works for them because it keeps composition, account linking, preview, staged validation, recovery, and future synchronization in one local workflow instead of scattering those steps across ad hoc edits in streaming software able to compose a web source.
 
 ## 7. Success metrics
 
@@ -434,7 +494,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - Bun server for local routing, runtime behavior, and future synchronization endpoints.
 
-- Wouter-based client routes for admin, demo, and render UIs.
+- Wouter-based client routes for admin, staging, and render UIs.
 
 - Future SQLite persistence for accepted history and startup rehydration.
 
@@ -444,13 +504,21 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - Direct D3.js integration for a future admin pipeline visualization or configuration view, without a wrapper layer between React and D3.
 
-- Consumption of `/render/:mode?` routes by streaming software able to compose a web source.
+- Consumption of `/render/:OVERLAY_ID` routes by streaming software able to compose a web source.
+
+- Consumption of `/staging/:OVERLAY_ID` routes for operator-side validation before going live.
 
 - Local configuration files, TLS assets, and packaged binary bootstrap behavior.
+
+- Platform-specific local certificate-generation capabilities or equivalent fallback commands for automatic self-signed HTTPS bootstrap.
 
 ### 8.2. Data storage & privacy
 
 - Store operator-facing configuration and accepted history locally by default.
+
+- Store generated local TLS key and certificate assets in the system folders used by the application.
+
+- Store linked-account credentials, OAuth2 tokens, and other auth grants securely in the system folders used by the application.
 
 - Persist only the minimum required configuration state, history, and audit context necessary for product behavior.
 
@@ -461,6 +529,10 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 - Treat admin and render routes as distinct access UIs when access restrictions are enabled.
 
 - Plan for redaction or omission of sensitive values from future audit or persisted history views if needed.
+
+- Warn clearly that automatically generated TLS certificates are self-signed and intended only for strictly local-machine use, not for serving the application on any network.
+
+- Warn clearly that linked-account credentials are sensitive and should not be shared outside the local machine context.
 
 ### 8.3. Scalability & performance
 
@@ -479,6 +551,10 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 - Designing the synchronization contract without overcoupling the product to one transport shape.
 
 - Keeping admin and render projections fully consistent as more UIs are added.
+
+- Handling certificate generation and storage safely across supported host platforms without requiring manual cryptographic setup from end users.
+
+- Handling OAuth2 and other provider-auth flows securely while keeping account linking understandable for non-technical users.
 
 - Managing SQLite persistence, migration, and rehydration without destabilizing the local-first model.
 
@@ -550,7 +626,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - **Phase 1**: Expand shared-state UIs beyond the current sandbox and foundation work (2-3 weeks)
 
-  - Key deliverables: data scraper, data retriever, data source, and data flow resource foundations, projected render route, improved admin shell behavior, additional selector-driven integrations
+  - Key deliverables: data scraper, data retriever, data source, and data flow resource foundations, projected live and staging overlay routes, improved admin shell behavior, additional selector-driven integrations
 
 - **Phase 2**: Add history and audit product UIs (1-2 weeks)
 
@@ -652,9 +728,13 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - The data source created by a scraper contains events from a single coherent event domain, such as chat-message events or follow-notification events.
 
+  - Data scrapers can expose fake-event generation so I can test data flows and widgets without waiting for real upstream events or consuming API credits.
+
   - Data retrievers can subscribe to one or more data sources in a non-destructive way, always depend on at least one upstream data source, and always produce exactly one new downstream data source.
 
   - I can enable or disable data scrapers from the visual flow editor.
+
+  - I can trigger scraper-provided fake events from the UI and see them travel through the same downstream flow as live events.
 
   - I can add data retrievers that sit on one flow or across multiple flows and route upstream flows into them.
 
@@ -683,6 +763,10 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
   - The archive manifest is stored as `manifest.json` at the root of that zip archive and includes `archiveFormatVersion`, `exportedAt`, `sourceAppVersion`, and one entry per participating exported element with `id`, `type`, `name`, archive-relative `file` path, `serializer`, serialized `formatVersion`, `dependencies`, and widget save or restore `mode` when relevant.
 
   - Each importable or exportable artifact involved in that archive carries its own serialized format version string, including plugin-provided artifacts when they participate.
+
+  - I can link upstream accounts or credentials to data scrapers from the UI with clear permission explanations, and revoke those links later.
+
+  - OAuth2-style account-linking is used when the upstream provider supports it.
 
   - When pipeline import or export involves widgets, the diagram-side operation uses only the widgets' data-flow-resource-only save or restore mode rather than their full-configuration save or restore mode.
 
@@ -730,17 +814,19 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - **ID**: US-008
 
-- **Description**: As a render consumer, I want `/render/:mode?` to reflect the approved shared state so that output for streaming software able to compose a web source stays consistent with operator intent.
+- **Description**: As a render consumer, I want `/render/:OVERLAY_ID` to reflect the live approved state of a specific overlay, and `/staging/:OVERLAY_ID` to reflect its staged in-progress state, so that live output stays stable while validation remains separate.
 
 - **Acceptance criteria**:
 
-  - `/render/:mode?` renders from shared projected state instead of a placeholder page.
+  - `/render/:OVERLAY_ID` renders the live projected state for that overlay instead of a placeholder page.
+
+  - `/staging/:OVERLAY_ID` renders the staged projected state for that overlay instead of sharing the live route output.
 
   - Render routes remain read-only from the perspective of editing workflows.
 
-  - Changes accepted in admin UIs appear in the render UI.
+  - Changes promoted to the live revision appear in the render UI, while staged-only changes appear in the staging UI until they are promoted.
 
-  - Render behavior remains stable when a route mode is omitted or changed.
+  - Render behavior remains stable when different overlay IDs are requested or when a staging revision is missing.
 
 ### 10.9. Undo or reset recent changes
 
@@ -838,17 +924,63 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - Authentication or access controls do not block local operator workflows when explicitly disabled.
 
+### 10.15. Link external accounts to data scrapers securely
+
+- **ID**: US-015
+
+- **Description**: As a streamer, I want to link and revoke upstream accounts from the UI so that data scrapers can work without forcing me to manage secrets manually.
+
+- **Acceptance criteria**:
+
+  - The UI can start an account-linking flow for a scraper that requires upstream authorization.
+
+  - The UI explains what account access and permissions are being requested before the user approves the link.
+
+  - OAuth2-style authorization is used when the upstream provider supports it.
+
+  - The resulting credentials or auth grants are stored securely in the system folders used by the application.
+
+  - The user can revoke or disconnect a previously linked account from the UI.
+
+### 10.16. Choose icon-first or label-visible action controls
+
+- **ID**: US-016
+
+- **Description**: As an operator, I want action-heavy controls to be icon-first by default while still allowing visible labels when I prefer them, so that the UI can stay efficient without becoming unclear.
+
+- **Acceptance criteria**:
+
+  - Action-heavy buttons and controls prefer recognizable icons by default.
+
+  - I can enable a setting that keeps labels visible alongside those icons.
+
+  - When labels are hidden, the controls still expose tooltips or equivalent accessible names.
+
+  - The icon-first presentation does not remove clarity for destructive or high-risk actions.
+
 ### 10.15. Launch the packaged runtime with local bootstrap behavior
 
 - **ID**: US-015
 
-- **Description**: As a maintainer, I want the packaged application to initialize its config and local database cleanly so that streamers can run it without manual setup steps.
+- **Description**: As a streamer, maintainer, or plugin developer, I want the packaged application to initialize its config, local TLS assets, and local database cleanly so that end users can run it without manual setup steps and developers can still target the same runtime behavior.
 
 - **Acceptance criteria**:
 
   - The packaged binary starts on supported host platforms.
 
+  - The bundled executable is the primary supported launch path for end users.
+
+  - Development workflows such as `bun dev` remain available for NEXIS maintainers and plugin developers without redefining the end-user entrypoint.
+
   - Required config and database files are created or discovered automatically.
+
+  - If local TLS assets are missing, the app offers to generate a self-signed local TLS certificate and matching key automatically by using whatever certificate-generation capability is available on the host platform.
+
+  - Generated TLS assets are stored in the system folders used by the application.
+
+  - The app warns clearly that any generated local TLS certificate is self-signed and suitable only for strictly local-machine use, not for serving the application on any network.
+
+  - The local UI is served over HTTPS once valid local TLS assets are available.
 
   - Startup failures surface actionable errors instead of silent exits.
 
