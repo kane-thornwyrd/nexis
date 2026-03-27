@@ -7,8 +7,8 @@
 - [ ] Harden the first event-sourced state milestone around a future admin flow
 - [ ] Expand focused tests around replay, undo, and selector-driven projections
 - [ ] Drive `/render/:mode?` from projected `AppState` instead of an empty placeholder
-- [ ] Add a history and audit surface that shows command suites and accepted events
-- [ ] Prepare the admin and render surfaces for real-time synchronization from a shared domain model
+- [ ] Add a history and audit UI that shows command suites and accepted events
+- [ ] Prepare the admin and render UIs for real-time synchronization from a shared domain model
 
 
 ## Backlog
@@ -16,7 +16,7 @@
 - [ ] Implement the first capability-oriented ports for chat events, subscription events, payment events, and social activity events
 - [ ] Implement and iteratively refine the normalized capability event envelope and the first capability-event shapes with real adapter constraints
 - [ ] Implement canonical actor identity references and actor-account-to-identity linking across providers
-- [ ] Implement an admin data-pipeline editor as the primary event-driven configuration UI with stable ids, dependency-derived midpoint retriever placement, element-owned binding identifiers, local visual preferences, scraper toggles, retriever nodes, widget-instance stickers, widget-field dots placed directly on flows, downstream warnings, history-safe undo, and import/export for individual retriever configurations or whole-diagram pipeline configurations using direct D3.js integration
+- [ ] Implement an admin data-pipeline editor as the primary event-driven configuration UI with stable ids, dependency-derived midpoint retriever placement, element-owned binding identifiers, manifest-backed whole-diagram pipeline archives, per-artifact serialized format versions, local visual preferences, scraper toggles, retriever nodes, widget-instance stickers, widget-field dots placed directly on flows, downstream warnings, history-safe undo, and import/export for individual retriever configurations or whole-diagram pipeline configurations using direct D3.js integration
 - [ ] Implement external platform adapters for Discord, Twitch, YouTube, PeerTube, ActivityPub, TikTok, PayPal, and Tipeee or TipeeeStream against that shared contract
 - [ ] Persist linear history to SQLite through the Bun backend
 - [ ] Decide the backend API and real-time transport shape for local-first synchronization
@@ -25,6 +25,16 @@
 
 
 ## Done
+- [x] Run a behavior-preserving post-validation cleanup pass on the source-available licensing and contribution docs
+- [x] Tighten the source-available licensing and contribution wording across the README, license note, commercial licensing note, and contributing guide
+- [x] Add the source-available license, commercial licensing note, and DCO-based contributing guide
+- [x] Add Sponsors and Contributing sections to the README and document licensing guidance
+- [x] Run a behavior-preserving post-validation cleanup pass on the manifest/UI terminology docs
+- [x] Finalize the manifest contract, opaque format-version rule, Mermaid Sankey example, and UI terminology
+- [x] Run a behavior-preserving post-validation cleanup pass on the pipeline archive manifest and serialized-format-version docs
+- [x] Define the pipeline archive manifest and require versioned serialized formats for importable and exportable artifacts
+- [x] Run a behavior-preserving post-validation cleanup pass on the PRD versioning guidance and enforcement files
+- [x] Add PRD versioning guidance based on approximate semantic versioning and enforce PRD version bumps with a hook
 - [x] Run a behavior-preserving post-validation cleanup pass on the archive-based pipeline import/export and widget save/restore docs
 - [x] Document archive-based pipeline import/export and dual widget save/restore modes
 - [x] Run a behavior-preserving post-validation cleanup pass on the derived admin pipeline-editor docs after the midpoint-placement and element-owned binding-identifier refinement
@@ -72,7 +82,7 @@
 - [x] Run a behavior-preserving cleanup pass on the remaining route and server files after the demo-admin removal
 - [x] Tighten the demo-admin removal React route files with lightweight cleanup
 - [x] Remove the demo-admin stack and leave `/` as an empty dashboard drawer shell
-- [x] Remove the `/demo` page and promote `/` as the main admin surface
+- [x] Remove the `/demo` page and promote `/` as the main admin UI
 - [x] Run a post-validation lightweight React cleanup pass on the route-promotion React files
 - [x] Reorganize the project into a first-pass domain-driven structure
 - [x] Run a behavior-preserving post-validation cleanup pass on the domain-reorg source modules

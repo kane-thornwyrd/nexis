@@ -46,13 +46,15 @@ It distinguishes between:
 - [Enhancement configuration](#enhancement-configuration)
 - [Preview projection](#preview-projection)
 - [Render projection](#render-projection)
-- [Admin surface](#admin-surface)
+- [Admin UI](#admin-ui)
 - [History, audit, and undo](#history-audit-and-undo)
 - [Render mode](#render-mode)
 - [Project or workspace](#project-or-workspace)
 - [Overlay revision and publication state](#overlay-revision-and-publication-state)
 - [Layer](#layer)
 - [Binding](#binding)
+- [Pipeline archive manifest](#pipeline-archive-manifest)
+- [Serialized format version](#serialized-format-version)
 - [Transform](#transform)
 - [Credential or auth grant](#credential-or-auth-grant)
 - [Validation issue](#validation-issue)
@@ -102,6 +104,7 @@ Current capabilities:
 Import and export behavior:
 - A widget should expose a full-configuration save or restore mode that covers its whole widget configuration.
 - A widget should also expose a data-flow-resource-only save or restore mode that covers only the widget fields backed by data flow resources.
+- Any widget save or restore payload should carry a widget serialized format version string that is independent from the app version.
 - When a widget participates in pipeline import or export, only the data-flow-resource-only save or restore mode should be used.
 
 Why it is strong:
@@ -256,7 +259,7 @@ Current definition:
 Architectural constraints:
 - Domain and application code should not depend directly on React, Bun HTTP, WebSocket, SQLite, filesystem watchers, MQTT clients, or provider-specific APIs and SDKs.
 - Provider-specific logic should live in adapters at the boundary of the system.
-- Admin and render surfaces should adapt user intent and projected state to the same core model rather than maintaining parallel models.
+- Admin and render UIs should adapt user intent and projected state to the same core model rather than maintaining parallel models.
 
 [Back to top](#nexis-domain-glossary)
 
@@ -277,6 +280,7 @@ Required fields and responsibilities:
 Optional responsibilities:
 - Capability-specific factories or handlers that connect the plugin to data scrapers or adjacent ingestion paths.
 - Runtime metadata useful for discovery, diagnostics, or operator-facing status.
+- If the plugin exposes importable or exportable artifacts, declarations of their serializers and serialized format version strings.
 
 [Back to top](#nexis-domain-glossary)
 
@@ -494,7 +498,7 @@ Current definition:
 - Adapters translate between the core model and external systems, frameworks, protocols, or providers.
 
 Adapter categories:
-- Presentation adapters such as the admin surface and render surface.
+- Presentation adapters such as the admin UI and render UI.
 - Infrastructure adapters such as persistence, runtime, transport, and external platform adapters.
 
 Named external platform adapters:
@@ -605,12 +609,12 @@ What still needs definition:
 
 [Back to top](#nexis-domain-glossary)
 
-### Admin surface
+### Admin UI
 
 Status: underdefined
 
 Current definition:
-- The operator-facing editing surface.
+- The operator-facing editing UI.
 - Diagram-addressable elements such as data scrapers, data sources, data retrievers, data flow resources, widgets, and widget instances should use stable persisted identifiers and faithful names rather than synthetic helper labels.
 - It may include a dedicated pipeline editor for visualizing and configuring data pipelines, such as a dynamic Sankey or alluvial diagram where data scrapers are the origins of flows, data retrievers are nodes that sit on one or more upstream flows, and widget-field dots represent data flow resources attached to widget instances.
 - For event-driven widget hydration, that pipeline editor can act as the primary configuration UI even though the visible diagram is derived from persisted element configuration on data scrapers, data retrievers, data flow resources, widgets, and widget instances rather than stored as a separate shared configuration artifact.
@@ -633,12 +637,42 @@ Current definition:
 - A binding is element-owned derived configuration that connects a widget field or widget input to a data flow resource and, through it, to one or more data sources.
 - Retriever configurations should persist their own upstream-data-source binding identifiers, and data flow resource configurations should persist their own ingested-data-source binding identifiers, rather than storing separate diagram-only connection objects.
 - In the admin pipeline editor, bindings are manipulated by placing widget-field dots directly on the relevant flows so the represented data flow resource updates its own binding identifier and ingests events from the flow it is placed on.
-- Importing or exporting whole-diagram pipeline configurations should use an archive that bundles each participating element's own serialized import or export format, rather than inventing a separate whole-diagram binding schema.
+- Importing or exporting whole-diagram pipeline configurations should use a zip archive that bundles each participating element's own serialized import or export format together with a lightweight manifest, rather than inventing a separate whole-diagram binding schema.
 
 What still needs definition:
-- The exact archive container conventions, manifest shape if any, and file naming rules.
 - Whether any non-data-flow-resource widget inputs should ever participate in the pipeline editor.
 - How manual inputs, fallback values, and degraded states participate in a binding.
+
+[Back to top](#nexis-domain-glossary)
+
+### Pipeline archive manifest
+
+Status: underdefined
+
+Current definition:
+- A pipeline archive manifest is a lightweight index file included in a whole-diagram pipeline configuration archive.
+- In the first pass, that manifest should be stored as `manifest.json` at the root of a zip archive containing the exported artifacts.
+- It should declare `archiveFormatVersion`, `exportedAt`, `sourceAppVersion`, and one entry per participating exported element.
+- Each manifest entry should include the element `id`, `type`, `name`, archive-relative `file` path, `serializer`, serialized `formatVersion`, `dependencies`, and widget save or restore `mode` when relevant.
+- It should summarize compatibility and discovery metadata without duplicating the full serialized payloads already owned by the exported elements.
+
+What still needs definition:
+- Whether integrity metadata such as hashes or signatures should be part of the first-pass manifest.
+- Whether dependency lists are strict validation inputs, advisory import hints, or both.
+
+[Back to top](#nexis-domain-glossary)
+
+### Serialized format version
+
+Status: underdefined
+
+Current definition:
+- A serialized format version is the version string carried by an importable or exportable artifact to describe the structure of its serialized data independently from the app version.
+- Widgets, data scrapers, data retrievers, data flow resources, plugin-provided artifacts, and future importable or exportable artifact kinds should each expose their own serialized format version string when they support save or restore or import or export.
+- Importers should treat that value as an opaque compatibility label rather than assuming semantic versioning or monotonic ordering, and migration strategy remains the responsibility of the artifact or plugin author rather than the NEXIS core.
+
+What still needs definition:
+- How core import UIs should report unsupported serialized format version strings to operators when an artifact loader or plugin rejects them.
 
 [Back to top](#nexis-domain-glossary)
 
@@ -829,7 +863,7 @@ graph TD
   Policy[Capability Policy]
   Preview[Preview Projection]
   Render[Render Projection]
-  Admin[Admin Surface]
+  Admin[Admin UI]
   Subscription[Render Consumer or Subscription]
 
   Project --> Overlay

@@ -6,7 +6,27 @@ This file tracks significant changes to the codebase and the goal behind each ch
 
 Add new entries in reverse chronological order.
 
+### 2026-03-27
+- Tightened the source-available licensing docs so the README, license notice, commercial-licensing note, and contributing guide consistently use the full PolyForm license name and the same public-license wording.
+  Goal: reduce small terminology drift across the new licensing files without changing the project's licensing model or contribution flow.
+- Added a source-available licensing setup around the PolyForm Noncommercial License 1.0.0, a commercial-licensing note, a DCO-based contributing guide, and a README License section.
+  Goal: make the project's public licensing and contribution path explicit without opening commercial use by default.
+- Added README sections for Contributing and Sponsors so contribution guidance and sponsorship links have clear dedicated entry points as the project grows.
+  Goal: make the public-facing project metadata easier to extend without waiting for the full contributing guide or sponsor setup to exist.
+- Tightened the manifest and terminology docs by clarifying that manifest `file` values are archive-relative paths, normalizing a few leftover UI-oriented `surface` phrases in the changelog history, and bumping `PRD.md` to `0.4.1` for this non-normative cleanup.
+  Goal: reduce small remaining terminology drift after the manifest, Sankey-example, and UI-language documentation pass without changing product behavior.
+
 ### 2026-03-26
+- Finalized the first-pass pipeline archive packaging contract by fixing the manifest file to `manifest.json` at the root of a zip archive, treating serialized format versions as opaque strings owned by artifact or plugin authors, adding a fake Mermaid Sankey example for the data-flows admin UI, and replacing several UI-oriented `surface` references with `UI`, then bumped `PRD.md` to `0.4.0` for this additive requirements expansion.
+  Goal: make the archive contract concrete, keep import or export compatibility author-owned, and align the product language more directly with UI terminology.
+- Tightened the pipeline archive manifest and serialized-format-version wording so the glossary and PRD consistently describe widget save or restore `mode`, participating exported elements, and plugin-provided artifacts, and bumped `PRD.md` to `0.3.1` for this non-normative cleanup.
+  Goal: reduce residual terminology drift after the first-pass pipeline archive manifest documentation pass without changing the import or export model.
+- Added a first-pass manifest direction for whole-diagram pipeline archives and generalized serialized format versions across importable and exportable artifacts, including plugin-provided ones, and bumped `PRD.md` to `0.3.0` for this additive requirements expansion.
+  Goal: make archive import or export more inspectable and compatible without inventing a separate diagram schema, while keeping evolving artifact structures safe to load through explicit per-artifact versions.
+- Tightened the PRD versioning wording so the repo instructions, enforcement hook feedback, changelog, and task tracker consistently use approximate semantic versioning and the same bump categories.
+  Goal: reduce terminology drift around the PRD version policy without changing the enforcement behavior.
+- Added PRD versioning guidance based on approximate semantic versioning, bumped `PRD.md` to `0.2.0` for the current additive requirements expansion, and introduced an enforceable hook that blocks PRD edits without a valid increasing version bump.
+  Goal: keep PRD versioning disciplined through a combination of explicit policy and automatic enforcement instead of relying on memory.
 - Tightened the archive-based pipeline import/export and widget save/restore wording so the glossary, PRD, changelog, and task tracker consistently describe whole-diagram pipeline-configuration archives, full-configuration widget save/restore, and pipeline import/export using the data-flow-resource-only widget mode.
   Goal: reduce terminology drift after the archive-based pipeline import/export documentation pass without changing the intended pipeline behavior.
 - Documented that pipeline import or export uses an archive of the participating elements' own serialized formats, and that widgets expose both full-configuration and data-flow-resource-only save or restore modes with the pipeline editor using the latter.
@@ -24,7 +44,7 @@ Add new entries in reverse chronological order.
 - Documented the richer admin alluvial-diagram pipeline workflow: scrapers as flow origins, retrievers as configurable nodes, widget-field dots as data flow resources, downstream disable warnings, and retriever or whole-diagram pipeline configuration import and export.
   Goal: turn the earlier pipeline-visualization direction into a concrete admin workflow for configuring and inspecting event-driven widget hydration.
 - Clarified that data retrievers can subscribe to multiple upstream data sources non-destructively, and documented the admin pipeline visualization direction as a dynamic Sankey or alluvial view with direct D3.js integration.
-  Goal: make multi-source pipeline derivations understandable and configurable in the admin surface without hiding the actual flow topology.
+  Goal: make multi-source pipeline derivations understandable and configurable in the admin UI without hiding the actual flow topology.
 - Refined the data-scraper definition so each scraper creates exactly one single-domain data source.
   Goal: keep scraper boundaries explicit enough that chat, follows, and similar upstream domains do not get bundled into ambiguous mixed sources.
 - Tightened the glossary, PRD, changelog, and task tracker wording so overlay-scoped behavior consistently refers to widget instances, data flow resources are described as widget-facing listeners on data sources, and the latest event-pipeline tracking copy names upstream data sources explicitly.
@@ -83,7 +103,7 @@ Add new entries in reverse chronological order.
 - Removed the `demo-admin` stack from the live app and left `/` as an empty dashboard drawer shell.
   Goal: clear out the provisional demo-admin implementation before rebuilding the admin flow around the real overlay and widget domain.
 - Removed the `/demo` page, promoted the interactive admin experience to `/`, and stopped serving `/demo` as an active SPA route.
-  Goal: stop treating the operator UI as a demo-only surface and make the root route the main entrypoint.
+  Goal: stop treating the operator UI as a demo-only UI and make the root route the main entrypoint.
 - Reorganized the codebase into a first-pass domain-driven structure with explicit domain, application, presentation, and infrastructure layers, while keeping compatibility shims for the old paths.
   Goal: make responsibilities clearer, stop domain logic from depending on UI modules, and give future overlay and widget work a better architectural foundation.
 - Renamed the project to NEXIS across package metadata, build outputs, docs, manifests, storage keys, and repo automation.
@@ -115,11 +135,11 @@ Add new entries in reverse chronological order.
 
 ### 2026-03-23
 - Introduced client-side routes for `/`, `/demo`, and `/render/:mode?`, and served the SPA shell for those routes from the Bun backend.
-  Goal: separate the admin, demo, and render surfaces while keeping the packaged app on a single local-first server entrypoint.
+  Goal: separate the admin, demo, and render UIs while keeping the packaged app on a single local-first server entrypoint.
 - Added the first event-sourced app-state foundation with immutable types, append-only history, replay, undo, provider wiring, and selector-driven `APITester` state consumption.
   Goal: move the demo flow toward a single auditable application model that can later support persistence and real-time synchronization.
 - Extracted and hardened the dashboard drawer, restored the `/demo` background under the drawer provider, and fixed the mobile scrollbar regression.
-  Goal: stabilize the primary admin surface before more state-architecture work lands.
+  Goal: stabilize the primary admin UI before more state-architecture work lands.
 - Locked the frontend to the current dark theme and added a top-level application error boundary.
   Goal: simplify the visual baseline and improve recovery from unexpected runtime failures.
 - Created the Event Sourced State Guard agent and a living PRD for the local-first architecture roadmap.

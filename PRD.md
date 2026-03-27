@@ -6,21 +6,21 @@
 
 - NEXIS: the Product Requirements Document
 
-- Version: 0.1.0
+- Version: 0.4.1
 
 ### 1.2 Product summary
 
-NEXIS is a local-first stream enhancer with widgets and data. It is built on Bun, React, and TypeScript and is intended to give streamers a fast local control surface for configuring stream enhancements, previewing output, and delivering future render views for streaming software able to compose a web source.
+NEXIS is a local-first stream enhancer with widgets and data. It is built on Bun, React, and TypeScript and is intended to give streamers a fast local control UI for configuring stream enhancements, previewing output, and delivering future render UIs for streaming software able to compose a web source.
 
-Today the product provides a main admin surface and the first shared-state foundation for local experimentation. The current admin experience can still be used to validate presentation patterns, but it should not be treated as the authoritative source of long-term product functionality.
+Today the product provides a main admin UI and the first shared-state foundation for local experimentation. The current admin experience can still be used to validate presentation patterns, but it should not be treated as the authoritative source of long-term product functionality.
 
-The longer-term direction is to turn the project into a packaged single executable that lets users define enhancement configurations, bind widgets to manual inputs and data flow resources, preview the result, publish consistent render surfaces, synchronize updates locally, persist state safely, and inspect change history when needed.
+The longer-term direction is to turn the project into a packaged single executable that lets users define enhancement configurations, bind widgets to manual inputs and data flow resources, preview the result, publish consistent render UIs, synchronize updates locally, persist state safely, and inspect change history when needed.
 
 ### 1.3 First-pass domain model
 
 - **Overlay**: A configuration of widget instances meant to be composed on top of a video stream. It is not a single isolated panel or one-off component. A representative overlay might combine a chat widget instance that merges Twitch and YouTube chat on the right side of the viewport, a now-listening widget instance that shows the current track title and artist at the bottom of the viewport, and a donation-goal widget instance that displays progress toward an Ulule campaign goal. The overlay configuration also carries the widget-instance-specific configuration and an overlay dependency list for the widgets used to create those instances.
 
-- **Widget**: A reusable, importable, and exportable source object that proposes to the person creating or modifying an overlay a way to access visual elements or data in that overlay. A widget can hold reusable resources, styles, event reactions, and other reusable behavior that will be shared by the widget instances created from it. Widgets should support both full-configuration save or restore and data-flow-resource-only save or restore, with pipeline import or export using only the latter.
+- **Widget**: A reusable, importable, and exportable source object that proposes to the person creating or modifying an overlay a way to access visual elements or data in that overlay. A widget can hold reusable resources, styles, event reactions, and other reusable behavior that will be shared by the widget instances created from it. Widgets should support both full-configuration save or restore and data-flow-resource-only save or restore, with pipeline import or export using only the latter, and each serialized widget form should carry its own serialized format version string.
 
 - **Widget resource**: A reusable resource exposed by a widget. Current examples include visual resources, sound resources, animated resources, and data flow resources. A resource may come from static code, local files, or another resource-specific storage shape, and each resource kind may define how it is saved when the widget is exported.
 
@@ -36,7 +36,11 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - **Data flow resource**: A widget-facing resource that listens to the events of a data source, extracts or transforms those events into values that can hydrate widget fields or other widget inputs, and provides that widget-usable data without creating a new data source. In the admin pipeline editor, only widget fields backed by data flow resources participate as dots.
 
-- **Binding**: An element-owned derived configuration held on data retrievers, data flow resources, and widget-facing configuration rather than as a separate saved diagram object. Retriever configurations persist their own upstream-data-source binding identifiers, data flow resource configurations persist their own ingested-data-source binding identifiers, widget-side configuration persists its own referenced data-source identifiers, and pipeline import or export uses an archive of each element's own serialized format rather than inventing a separate whole-diagram binding schema.
+- **Binding**: An element-owned derived configuration held on data retrievers, data flow resources, and widget-facing configuration rather than as a separate saved diagram object. Retriever configurations persist their own upstream-data-source binding identifiers, data flow resource configurations persist their own ingested-data-source binding identifiers, widget-side configuration persists its own referenced data-source identifiers, and pipeline import or export uses an archive of each element's own serialized format plus a lightweight manifest rather than inventing a separate whole-diagram binding schema.
+
+- **Pipeline archive manifest**: A lightweight index file included in a whole-diagram pipeline configuration zip archive. In the first pass it should be stored as `manifest.json` at the root of that archive. It should declare `archiveFormatVersion`, `exportedAt`, `sourceAppVersion`, and one entry per participating exported element, where each entry includes `id`, `type`, `name`, archive-relative `file` path, `serializer`, serialized `formatVersion`, `dependencies`, and widget save or restore `mode` when relevant.
+
+- **Serialized format version**: A version string carried by any importable or exportable artifact to describe the structure of its serialized data independently from the app version. Widgets, data scrapers, data retrievers, data flow resources, plugin-provided artifacts, and future importable or exportable artifact kinds should each expose one when they support save or restore or import or export. NEXIS should treat that value as an opaque compatibility label rather than assuming semantic versioning or monotonic ordering, and migration remains the responsibility of the artifact or plugin author rather than the core app.
 
 - **Template**: The rendering or behavior definition a widget uses to turn its data into visible output or other widget behavior. In most cases, a renderable widget displays a template filled with current data.
 
@@ -48,9 +52,9 @@ The longer-term direction is to turn the project into a packaged single executab
 
 ### 2.1 Business goals
 
-- Establish NEXIS as a dependable local-first control surface for stream-facing widgets and overlay workflows.
+- Establish NEXIS as a dependable local-first control UI for stream-facing widgets and overlay workflows.
 
-- Reduce the time required to tune stream-related content and preview it safely before use in render surfaces.
+- Reduce the time required to tune stream-related content and preview it safely before use in render UIs.
 
 - Create a reusable product foundation that supports admin tools and future render routes for streaming software able to compose a web source without parallel implementations.
 
@@ -96,7 +100,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
 ### 3.2 Basic persona details
 
-- **Streamers**: Need a fast local surface for assembling stream enhancements, configuring behavior, and validating output during setup or live preparation.
+- **Streamers**: Need a fast local UI for assembling stream enhancements, configuring behavior, and validating output during setup or live preparation.
 
 - **Visual designers and technical producers**: Need to preview widgets, typography, theme tokens, and UI states quickly while evaluating how the overlay feels in context.
 
@@ -106,7 +110,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
 ### 3.3 Role-based access
 
-- **Streamers/Admins**: Can access admin-oriented surfaces such as `/`, manage the current enhancement configuration, use undo and reset, and eventually inspect history or audit information.
+- **Streamers/Admins**: Can access admin-oriented UIs such as `/`, manage the current enhancement configuration, use undo and reset, and eventually inspect history or audit information.
 
 - **Render viewers**: Can load render routes intended for viewing output only and should not be able to modify the underlying state.
 
@@ -138,7 +142,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Keep reusable widget configuration separate from widget-instance-specific overlay configuration.
 
-  - Support configuring widget placement, grouping, and visibility rules for render surfaces.
+  - Support configuring widget placement, grouping, and visibility rules for render UIs.
 
   - Support placements such as a right-side chat rail, a bottom now-listening bar, or a floating donation-goal module.
 
@@ -164,7 +168,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Allow data retrievers to subscribe to one or more data sources in a non-destructive way, require at least one upstream data source per retriever, and produce exactly one new downstream data source per retriever.
 
-  - Provide an admin-surface pipeline editor where data scrapers are the origins of flows, data retrievers are nodes that can sit on one flow or across multiple flows, and retrievers always create one new downstream flow without consuming the upstream ones.
+  - Provide an admin-UI pipeline editor where data scrapers are the origins of flows, data retrievers are nodes that can sit on one flow or across multiple flows, and retrievers always create one new downstream flow without consuming the upstream ones.
 
   - Use that pipeline editor as the primary configuration UI for event-driven widget hydration, while keeping the persisted shared configuration on the underlying data scrapers, data retrievers, data flow resources, widgets, and widget instances rather than in a separately saved diagram artifact.
 
@@ -184,9 +188,13 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Allow operators to enable or disable retrievers, propagate disabled state to downstream retrievers, grey out affected flows and nodes, and show red warning indicators on affected widget-field dots when disabled upstream flows break those bindings.
 
-  - Allow import and export of whole-diagram pipeline configurations as an archive containing the serialized import or export formats used by the participating data scrapers, data retrievers, data flow resources, and widgets.
+  - Allow import and export of whole-diagram pipeline configurations as a zip archive containing a lightweight manifest plus the serialized import or export formats used by the participating data scrapers, data retrievers, data flow resources, and widgets.
 
-  - Let each participating element keep its own serialized import or export format, and use archive composition rather than inventing a separate whole-diagram binding schema.
+  - Use a `manifest.json` file at the root of that zip archive that declares `archiveFormatVersion`, `exportedAt`, `sourceAppVersion`, and one entry per participating exported element with `id`, `type`, `name`, archive-relative `file` path, `serializer`, serialized `formatVersion`, `dependencies`, and widget save or restore `mode` when relevant.
+
+  - Let each participating element keep its own serialized import or export format and its own serialized format version string, and use archive composition rather than inventing a separate whole-diagram binding schema.
+
+  - Require any importable or exportable artifact, including plugin-provided artifacts, to carry its own serialized format version string so structural compatibility checks can be delegated to the relevant artifact or plugin author when data structures evolve.
 
   - Require widgets to support both full-configuration save or restore and data-flow-resource-only save or restore, with the pipeline editor using only the data-flow-resource-only mode.
 
@@ -208,7 +216,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - **Preview and visual sandboxing** (Priority: High)
 
-  - Provide a live preview surface that mirrors the current enhancement state.
+  - Provide a live preview UI that mirrors the current enhancement state.
 
   - Keep visual sandboxing subordinate to product requirements rather than letting cosmetic experiments define the product scope.
 
@@ -230,7 +238,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Treat changes to data scrapers, data retrievers, data flow resources, and their dependencies as history-tracked edits whose propagated downstream effects are also reverted when the originating change is undone.
 
-  - Provide enough structured history to support a future audit surface and troubleshooting workflow.
+  - Provide enough structured history to support a future audit UI and troubleshooting workflow.
 
 - **Widget permissions and control behavior** (Priority: Medium)
 
@@ -250,7 +258,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - **Real-time synchronization** (Priority: Medium)
 
-  - Propagate accepted admin changes to render surfaces in real time.
+  - Propagate accepted admin changes to render UIs in real time.
 
   - Keep admin, preview, and render projections consistent.
 
@@ -280,7 +288,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - First-time users are guided toward a starter enhancement configuration rather than raw technical controls.
 
-- The main admin surface can be used to evaluate layout, theming, and interaction polish, but it is not the product definition by itself.
+- The main admin UI can be used to evaluate layout, theming, and interaction polish, but it is not the product definition by itself.
 
 - Users define or open the current enhancement configuration, connect or enter the data it needs, and preview the result.
 
@@ -292,11 +300,11 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - **Launch the app**: Operators start the local app and open the browser UI.
 
-  - Startup should be predictable and should clearly expose the available product surfaces.
+  - Startup should be predictable and should clearly expose the available product UIs.
 
 - **Create or open an enhancement configuration**: Operators begin from a saved setup, a starter preset, or a new blank state.
 
-  - The first working surface should feel approachable and should not require code knowledge to begin.
+  - The first working UI should feel approachable and should not require code knowledge to begin.
 
 - **Configure widgets and data mappings**: Operators choose reusable widgets, create widget instances from them, define how those instances are arranged, and decide which manual inputs or data flow resources drive those widget instances.
 
@@ -304,11 +312,11 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Event-pipeline configuration should remain legible through a visual flow editor where scrapers originate flows, retrievers derive new flows, and widget-field dots expose field hydration points.
 
-- **Preview and refine presentation**: Operators use preview and sandbox surfaces to validate visual polish, layout, and readability.
+- **Preview and refine presentation**: Operators use preview and sandbox UIs to validate visual polish, layout, and readability.
 
   - Visual feedback should feel immediate, stable, and clearly connected to the current enhancement configuration.
 
-- **Publish to render surfaces**: Operators open or embed render routes that consume the approved shared state.
+- **Publish to render UIs**: Operators open or embed render routes that consume the approved shared state.
 
   - Render views should remain lightweight, read-only, and suitable for streaming software able to compose a web source.
 
@@ -342,7 +350,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - Port overrides should work when the default port is unavailable or already in use.
 
-- Access restrictions should protect editing surfaces without breaking render-only usage.
+- Access restrictions should protect editing UIs without breaking render-only usage.
 
 ### 5.4. UI/UX highlights
 
@@ -350,11 +358,29 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - Preview-first workflow that keeps user intent visible while editing.
 
-- Clear separation between editing surfaces, visual sandbox surfaces, and render-only surfaces.
+- Clear separation between editing UIs, visual sandbox UIs, and render-only UIs.
 
 - Flexible widget and data composition matters more than any one sandbox layout.
 
-- A dynamic Sankey or alluvial-style pipeline editor can make scrapers, multi-source data-retriever subscriptions, derived downstream data sources, and widget-field hydration dots legible in the admin surface.
+- A dynamic Sankey or alluvial-style pipeline editor can make scrapers, multi-source data-retriever subscriptions, derived downstream data sources, and widget-field hydration dots legible in the admin UI.
+
+### 5.5. Example Sankey-style admin UI sketch
+
+The following fake Mermaid example illustrates the intended shape of the data-flows admin UI, with scraper-created flows, retriever nodes, and widget-field dots fed by derived data sources.
+
+```mermaid
+sankey-beta
+  Twitch Chat Scraper,Twitch Chat Source,12
+  YouTube Chat Scraper,YouTube Chat Source,12
+  Twitch Chat Source,Merged Chat Retriever,12
+  YouTube Chat Source,Merged Chat Retriever,12
+  Merged Chat Retriever,Merged Chat Source,24
+  Merged Chat Source,Chat Rail.message dot,14
+  Merged Chat Source,Chat Rail.badge dot,10
+  Twitch Chat Source,Viewer Count Retriever,12
+  Viewer Count Retriever,Viewer Count Source,12
+  Viewer Count Source,Stats Card.viewerCount dot,12
+```
 
 - Widget-instance stickers or cards below the diagram can keep data-flow-resource dots visually grouped by widget ownership and reduce placement ambiguity.
 
@@ -408,7 +434,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - Bun server for local routing, runtime behavior, and future synchronization endpoints.
 
-- Wouter-based client routes for admin, demo, and render surfaces.
+- Wouter-based client routes for admin, demo, and render UIs.
 
 - Future SQLite persistence for accepted history and startup rehydration.
 
@@ -432,7 +458,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - Avoid external data transmission by default in the local-first model.
 
-- Treat admin and render routes as distinct access surfaces when access restrictions are enabled.
+- Treat admin and render routes as distinct access UIs when access restrictions are enabled.
 
 - Plan for redaction or omission of sensitive values from future audit or persisted history views if needed.
 
@@ -452,7 +478,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - Designing the synchronization contract without overcoupling the product to one transport shape.
 
-- Keeping admin and render projections fully consistent as more surfaces are added.
+- Keeping admin and render projections fully consistent as more UIs are added.
 
 - Managing SQLite persistence, migration, and rehydration without destabilizing the local-first model.
 
@@ -471,6 +497,8 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 - Avoid provider-specific ports in the core. External platform integrations should use a shared plugin contract plus a small set of capability-oriented ports.
 
 - The shared plugin contract should declare plugin identity, configuration, lifecycle, and which capability-oriented ports the plugin supports so new external platform adapters can be added as plugins without changing the core.
+
+- If a plugin exposes importable or exportable artifacts, the shared plugin contract should also declare their serializers and serialized format version strings so NEXIS can identify compatibility and hand migration responsibility to the plugin author for plugin-provided data.
 
 - The first capability-oriented ports should cover at least chat events, subscription events, payment events, and social activity events.
 
@@ -498,7 +526,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - Implement adapters in presentation and infrastructure layers rather than letting those technologies define the core model.
 
-- Treat admin and render surfaces as presentation adapters around the same core model.
+- Treat admin and render UIs as presentation adapters around the same core model.
 
 - Treat Discord, Twitch, YouTube, PeerTube, ActivityPub, TikTok, PayPal, and Tipeee or TipeeeStream as external platform adapters around the core rather than as domain-defining concepts.
 
@@ -520,15 +548,15 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 ### 9.3. Suggested phases
 
-- **Phase 1**: Expand shared-state surfaces beyond the current sandbox and foundation work (2-3 weeks)
+- **Phase 1**: Expand shared-state UIs beyond the current sandbox and foundation work (2-3 weeks)
 
   - Key deliverables: data scraper, data retriever, data source, and data flow resource foundations, projected render route, improved admin shell behavior, additional selector-driven integrations
 
-- **Phase 2**: Add history and audit product surfaces (1-2 weeks)
+- **Phase 2**: Add history and audit product UIs (1-2 weeks)
 
   - Key deliverables: operator-visible history view, accepted command and event display, undo context in the UI
 
-- **Phase 3**: Implement real-time synchronization between admin and render surfaces (2-3 weeks)
+- **Phase 3**: Implement real-time synchronization between admin and render UIs (2-3 weeks)
 
   - Key deliverables: transport contract, push-based updates, render consistency checks
 
@@ -542,19 +570,19 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 ## 10. User stories
 
-### 10.1. Launch the admin surface
+### 10.1. Launch the admin UI
 
 - **ID**: US-001
 
-- **Description**: As a streamer, I want to open the local admin surface so that I can manage my stream enhancement setup from one place.
+- **Description**: As a streamer, I want to open the local admin UI so that I can manage my stream enhancement setup from one place.
 
 - **Acceptance criteria**:
 
   - The local app exposes a browser-accessible admin route after startup.
 
-  - The admin surface loads without requiring a hosted backend.
+  - The admin UI loads without requiring a hosted backend.
 
-  - A usable starting configuration or entry point is visible when the surface opens.
+  - A usable starting configuration or entry point is visible when the UI opens.
 
   - The route works in both development and packaged runtime flows.
 
@@ -638,7 +666,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - The visual flow editor is the primary UI for configuring event-driven widget hydration, even though the visible diagram is derived from persisted element configurations rather than stored separately.
 
-  - I can inspect and configure data sources and data retrievers through a visual flow editor in the admin surface, where retrievers create new downstream flows without consuming the upstream ones.
+  - I can inspect and configure data sources and data retrievers through a visual flow editor in the admin UI, where retrievers create new downstream flows without consuming the upstream ones.
 
   - Data flow resources can listen to data source events, extract or transform those events into widget-usable values, and provide those values to widgets.
 
@@ -650,7 +678,11 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - Disabling a retriever disables the downstream retrievers that depend on it, greys out the affected flows and nodes, and places red warning indicators on affected widget-field dots.
 
-  - I can import or export a whole-diagram pipeline configuration as an archive of the participating elements' own serialized formats.
+  - I can import or export a whole-diagram pipeline configuration as a zip archive of the participating elements' own serialized formats plus a lightweight manifest.
+
+  - The archive manifest is stored as `manifest.json` at the root of that zip archive and includes `archiveFormatVersion`, `exportedAt`, `sourceAppVersion`, and one entry per participating exported element with `id`, `type`, `name`, archive-relative `file` path, `serializer`, serialized `formatVersion`, `dependencies`, and widget save or restore `mode` when relevant.
+
+  - Each importable or exportable artifact involved in that archive carries its own serialized format version string, including plugin-provided artifacts when they participate.
 
   - When pipeline import or export involves widgets, the diagram-side operation uses only the widgets' data-flow-resource-only save or restore mode rather than their full-configuration save or restore mode.
 
@@ -666,7 +698,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - **ID**: US-006
 
-- **Description**: As a streamer, I want a live preview of the current enhancement state so that I can validate the result before publishing it to render surfaces.
+- **Description**: As a streamer, I want a live preview of the current enhancement state so that I can validate the result before publishing it to render UIs.
 
 - **Acceptance criteria**:
 
@@ -678,15 +710,15 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - Preview rendering stays stable when multiple fields or widgets change in sequence.
 
-### 10.7. Use the admin surface as a visual sandbox
+### 10.7. Use the admin UI as a visual sandbox
 
 - **ID**: US-007
 
-- **Description**: As a designer or technical producer, I want the main admin surface to support visual sandboxing so that I can refine cosmetics and interaction polish without confusing that work with final product requirements.
+- **Description**: As a designer or technical producer, I want the main admin UI to support visual sandboxing so that I can refine cosmetics and interaction polish without confusing that work with final product requirements.
 
 - **Acceptance criteria**:
 
-  - The main admin surface supports visual experimentation without becoming a separate product definition.
+  - The main admin UI supports visual experimentation without becoming a separate product definition.
 
   - The sandbox can be used to validate layout, theme, and interaction polish.
 
@@ -694,7 +726,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - The sandbox remains useful without becoming the only supported workflow.
 
-### 10.8. Publish to a render surface
+### 10.8. Publish to a render UI
 
 - **ID**: US-008
 
@@ -706,7 +738,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - Render routes remain read-only from the perspective of editing workflows.
 
-  - Changes accepted in admin surfaces appear in the render surface.
+  - Changes accepted in admin UIs appear in the render UI.
 
   - Render behavior remains stable when a route mode is omitted or changed.
 
@@ -750,7 +782,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - **Acceptance criteria**:
 
-  - The UI exposes a history or audit surface for accepted entries.
+  - The UI exposes a history or audit UI for accepted entries.
 
   - Each entry shows when it happened and which command suite produced which event.
 
@@ -758,17 +790,17 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - The history view reflects the same append-only model used for replay.
 
-### 10.12. Synchronize admin changes to render surfaces in real time
+### 10.12. Synchronize admin changes to render UIs in real time
 
 - **ID**: US-012
 
-- **Description**: As a streamer, I want accepted changes to propagate to render surfaces in real time so that live output stays in sync with the control surface.
+- **Description**: As a streamer, I want accepted changes to propagate to render UIs in real time so that live output stays in sync with the control UI.
 
 - **Acceptance criteria**:
 
-  - Accepted admin changes are pushed to connected render surfaces without manual refresh.
+  - Accepted admin changes are pushed to connected render UIs without manual refresh.
 
-  - Render surfaces apply updates in order and remain consistent with the current projected state.
+  - Render UIs apply updates in order and remain consistent with the current projected state.
 
   - Temporary transport interruptions recover without duplicating or losing accepted changes.
 
@@ -782,7 +814,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - **Acceptance criteria**:
 
-  - Missing or stale data produces a fallback state instead of a broken surface.
+  - Missing or stale data produces a fallback state instead of a broken UI.
 
   - Invalid data mappings are surfaced clearly to the user.
 
@@ -794,15 +826,15 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - **ID**: US-014
 
-- **Description**: As a maintainer, I want admin-editing routes to be protected when access restrictions are enabled so that control surfaces are not modified by unauthorized viewers.
+- **Description**: As a maintainer, I want admin-editing routes to be protected when access restrictions are enabled so that control UIs are not modified by unauthorized viewers.
 
 - **Acceptance criteria**:
 
-  - The product can distinguish admin-editing surfaces from render-only surfaces.
+  - The product can distinguish admin-editing UIs from render-only UIs.
 
   - When access protection is enabled, unauthorized users cannot change admin state.
 
-  - Render-only consumers can still access the surfaces intended for viewing.
+  - Render-only consumers can still access the UIs intended for viewing.
 
   - Authentication or access controls do not block local operator workflows when explicitly disabled.
 

@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "bun .github/hooks/prd-version-enforcement.ts",
+        "linux": "sh .github/hooks/run-bun-hook.sh .github/hooks/prd-version-enforcement.ts",
+        "osx": "sh .github/hooks/run-bun-hook.sh .github/hooks/prd-version-enforcement.ts",
+        "cwd": ".",
+        "timeout": 30
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "bun .github/hooks/prd-version-enforcement.ts",
+        "linux": "sh .github/hooks/run-bun-hook.sh .github/hooks/prd-version-enforcement.ts",
+        "osx": "sh .github/hooks/run-bun-hook.sh .github/hooks/prd-version-enforcement.ts",
+        "cwd": ".",
+        "timeout": 30
+      }
+    ]
+  }
+}

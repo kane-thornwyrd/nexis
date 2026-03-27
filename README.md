@@ -2,11 +2,11 @@
 
 Stream enhancer with widgets and data.
 
-NEXIS is a local-first Bun + React application for experimenting with stream-facing widgets, operator controls, and data-driven overlay surfaces. The current app serves a root admin surface and a placeholder render route while the project moves toward an event-sourced state model with replay, undo, and future real-time synchronization.
+NEXIS is a local-first Bun + React application for experimenting with stream-facing widgets, operator controls, and data-driven overlay UIs. The current app serves a root admin UI and a placeholder render route while the project moves toward an event-sourced state model with replay, undo, and future real-time synchronization.
 
-## Current Surfaces
+## Current UIs
 
-- `/` empty admin surface with an empty dashboard drawer shell
+- `/` empty admin UI with an empty dashboard drawer shell
 - `/render/:mode?` render route placeholder for future views in streaming software able to compose a web source
 
 ## Stack
@@ -62,7 +62,7 @@ PORT=3000 bun dev
 
 - The frontend is bootstrapped from `src/frontend.tsx` and now routes through `src/presentation/app/AppRoutes.tsx`.
 - The Bun server entrypoint remains `src/server.ts`, with HTTP and realtime helpers under `src/infrastructure/`.
-- The active application surface is currently a minimal admin drawer shell plus the placeholder render route.
+- The active application UI is currently a minimal admin drawer shell plus the placeholder render route.
 - The current source layout centers on `src/presentation/` for routes and shells plus `src/infrastructure/` for HTTP and realtime server concerns.
 - The GitHub `Release` workflow keeps the first release on the current `package.json` version, increments the leading release number after that, builds every configured binary, publishes those binaries as GitHub release assets using the changelog slice since the previous release, and can also be triggered manually when an out-of-band release is needed.
 - The release workflow archives compiled binaries before upload because GitHub blocks several raw executable filename extensions such as `.app` and `.exe` for release assets.
@@ -73,8 +73,29 @@ PORT=3000 bun dev
 - `PRD.md` for product and architecture direction
 - `tasks.md` for the active work tracker
 - `CHANGELOG.md` for significant project changes
+- `CONTRIBUTING.md` for contribution expectations and signoff requirements
+
+## Contributing
+
+Contributions are welcome.
+
+Contribution guidelines will live in [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+Contributors are expected to sign off their commits as described in that guide.
+
+## Sponsors
+
+Sponsorship links will be added here.
+
+Sponsors will be listed here once the project has active supporters.
+
+## License
+
+NEXIS is publicly available under the source-available [PolyForm Noncommercial License 1.0.0](./LICENSE).
+
+Commercial use is not granted under that public license. If you want to use NEXIS commercially, see [COMMERCIAL-LICENSING.md](./COMMERCIAL-LICENSING.md).
 
 ## Current Status
 
-- The admin surface is intentionally empty while the next overlay-driven admin flow is defined
+- The admin UI is intentionally empty while the next overlay-driven admin flow is defined
 - Persistence, real-time sync, and final render routes are still in progress

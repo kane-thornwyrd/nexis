@@ -38,6 +38,15 @@ When evolving the domain model or domain vocabulary in this repository:
 - When adding, renaming, or reclassifying glossary entries, keep the browse sections synchronized with the corresponding headings.
 - Prefer updating `GLOSSARY.md` instead of leaving domain terminology only in chat responses.
 
+When evolving the product requirements document in this repository:
+
+- Maintain the version number in `PRD.md` whenever `PRD.md` changes.
+- Bump the `PRD.md` version using approximate semantic versioning (semver).
+- Use a patch bump for wording clarification, formatting cleanup, examples, and other non-normative edits.
+- Use a minor bump for additive requirements, new user stories, new capabilities, new workflows, and other scope-expanding changes.
+- Use a major bump for incompatible requirement changes, removed requirements, primary workflow resets, or domain-model changes that invalidate earlier PRD assumptions.
+- Keep the `PRD.md` version bump aligned with the actual document change instead of postponing it.
+
 When laying out new architecture or moving code across layers in this repository:
 
 - Prefer hexagonal architecture principles.
