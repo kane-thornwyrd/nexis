@@ -7,6 +7,10 @@ This file tracks significant changes to the codebase and the goal behind each ch
 Add new entries in reverse chronological order.
 
 ### 2026-03-27
+- Tightened the Art Direction, widget-resource-tag, bundled starter-content, and guided-recipe-onboarding wording by renaming the glossary's opening concept section to `Core concepts`, aligning recipe terminology around bundled starter recipes and guided recipe wizards, and bumped `PRD.md` to `1.1.1` for this non-normative cleanup.
+  Goal: reduce small terminology drift across the glossary, PRD, changelog, and task tracker without changing the documented feature set.
+- Defined Art Direction archives, widget resource tags, bundled starter widgets and data scrapers, and recipe-based welcome-page onboarding with a guided recipe wizard, and bumped `PRD.md` to `1.1.0` for this additive requirements expansion.
+  Goal: make NEXIS easier to start, easier to style, and easier to share by bundling reusable visual direction and guided starter configurations into the product model.
 - Added the direct `releases/latest` GitHub link to the end-user README so streamers can jump straight to the newest packaged release notes and downloads.
   Goal: reduce friction between discovering NEXIS and actually reaching the latest packaged build.
 - Tightened the README and developer guide wording by removing a duplicated README status section and aligning the developer guide with the executable-first user-facing messaging.

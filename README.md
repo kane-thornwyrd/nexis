@@ -68,6 +68,8 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Sponsors
 
+![Ulule](./src/branding/Ulule_Coming_Soon.png)
+
 Sponsorship links will be added here.
 
 Sponsors will be listed here once the project has active supporters.

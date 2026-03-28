@@ -10,7 +10,7 @@ It distinguishes between:
 
 ## Browse by section
 
-- [Defined concepts](#defined-concepts)
+- [Core concepts](#core-concepts)
 - [Architecture vocabulary](#architecture-vocabulary)
 - [Underdefined concepts](#underdefined-concepts)
 - [Missing concepts](#missing-concepts)
@@ -22,8 +22,11 @@ It distinguishes between:
 - [Overlay](#overlay)
 - [Widget](#widget)
 - [Widget resource](#widget-resource)
+- [Art Direction](#art-direction)
+- [Widget resource tag](#widget-resource-tag)
 - [Widget instance](#widget-instance)
 - [Overlay dependency](#overlay-dependency)
+- [Recipe](#recipe)
 - [Data scraper](#data-scraper)
 - [Data retriever](#data-retriever)
 - [Data source](#data-source)
@@ -65,7 +68,7 @@ It distinguishes between:
 - [Theme profile](#theme-profile)
 - [Scene or composition target](#scene-or-composition-target)
 
-## Defined concepts
+## Core concepts
 
 ### Overlay
 
@@ -131,6 +134,46 @@ Current examples:
 
 Export behavior:
 - Each resource kind may expose its own way to be saved when a widget is exported.
+
+[Back to top](#nexis-domain-glossary)
+
+### Art Direction
+
+Status: underdefined
+
+Current definition:
+- An Art Direction is a reusable package of overlays plus design-oriented widget resources, such as images, animated assets, and sounds, that can be imported, exported, and reapplied as one archive.
+- It exists so users can apply a coherent visual style without rebuilding the same presentation choices manually.
+- An Art Direction should declare its dependencies so the UI can show which widgets and resource types it supports before the user chooses what to override.
+
+Behavior expectations:
+- Importing or applying an Art Direction should allow the user to choose which current widget resources to override.
+- Even when a user skips a specific override, imported Art Direction resources should remain available for compatible resource field types covered by that Art Direction.
+- If imported overlays would collide by name with existing overlays, the imported overlays should receive a numeric suffix or increment an existing numeric suffix rather than overwriting the current overlays implicitly.
+
+What still needs definition:
+- The exact archive shape for Art Direction imports and exports.
+- Whether Art Directions package reusable starting overlays, exact overlay revisions, or both.
+- How re-applying an Art Direction should behave after local widget resources have been modified.
+
+[Back to top](#nexis-domain-glossary)
+
+### Widget resource tag
+
+Status: underdefined
+
+Current definition:
+- A widget resource tag is a plugin-authored classification attached to a widget resource to describe what kinds of workflows that resource can participate in.
+- Tags such as `art` and `data` can indicate whether a resource can be packaged inside an Art Direction, linked to a data source, or both.
+- Tags should not be arbitrarily edited by end users, because they describe the resource contract rather than a user preference.
+
+Behavior expectations:
+- Widget resource tags should help the UI decide which resources are eligible for Art Direction packaging or data-flow configuration.
+- Applying an Art Direction may also associate provenance-oriented markers, such as the Art Direction identity itself, so the UI can show which resources currently come from that Art Direction.
+
+What still needs definition:
+- Which tags should be standardized across the core versus left entirely to plugins.
+- Whether provenance-style Art Direction markers should be modeled as tags or as adjacent metadata.
 
 [Back to top](#nexis-domain-glossary)
 
@@ -243,6 +286,27 @@ Operational expectations:
 - Overlay configuration should display the overlay dependency list.
 - Overlay import or activation should present the overlay dependency list before proceeding.
 - The user should be able to continue even when some referenced widgets are missing.
+
+[Back to top](#nexis-domain-glossary)
+
+### Recipe
+
+Status: underdefined
+
+Current definition:
+- A recipe is a reusable application-configuration starter that orchestrates one or more overlays, widgets, data scrapers, data retrievers, and related configuration through the app-level shared state.
+- It exists to improve onboarding by giving new users guided starting points instead of forcing them to configure the application from scratch.
+- A recipe may be bundled with the app for common starter scenarios or imported from an external file for more advanced setups.
+
+Behavior expectations:
+- The welcome page should be able to present beginner-friendly bundled recipes as well as import paths for more advanced recipe files.
+- Loading a recipe should run a guided recipe wizard that prompts for any required data-scraper configuration and account linking before the recipe is considered ready.
+- When possible, account linking inside that wizard should be grouped into a single checklist-style step.
+
+What still needs definition:
+- The exact recipe file format and whether it is archive-based or purely configuration-based.
+- Which parts of recipe application are idempotent, mergeable, or always create new overlays and widgets.
+- How recipe re-application should behave after the user customizes the generated configuration.
 
 [Back to top](#nexis-domain-glossary)
 
@@ -840,22 +904,25 @@ Why it is needed:
 4. Overlay revision and publication state
 5. Widget
 6. Widget resource
-7. Data scraper
-8. Data retriever
-9. Data source
-10. Data flow resource
-11. Widget instance
-12. Template
-13. Viewport placement
-14. Layer
-15. Binding
-16. Transform
-17. Credential or auth grant
-18. Permission
-19. Capability policy
-20. Preview projection
-21. Render projection
-22. Render consumer or subscription
+7. Widget resource tag
+8. Art Direction
+9. Recipe
+10. Data scraper
+11. Data retriever
+12. Data source
+13. Data flow resource
+14. Widget instance
+15. Template
+16. Viewport placement
+17. Layer
+18. Binding
+19. Transform
+20. Credential or auth grant
+21. Permission
+22. Capability policy
+23. Preview projection
+24. Render projection
+25. Render consumer or subscription
 
 [Back to top](#nexis-domain-glossary)
 
@@ -869,6 +936,9 @@ graph TD
   Revision[Overlay Revision and Publication State]
   Widget[Widget]
   WidgetResource[Widget Resource]
+  ResourceTag[Widget Resource Tag]
+  ArtDirection[Art Direction]
+  Recipe[Recipe]
   DataScraper[Data Scraper]
   DataRetriever[Data Retriever]
   DataSource[Data Source]
@@ -889,6 +959,8 @@ graph TD
 
   Project --> Overlay
   Project --> Widget
+  Project --> ArtDirection
+  Project --> Recipe
   Project --> DataScraper
   Project --> DataRetriever
   Project --> Credential
@@ -901,6 +973,12 @@ graph TD
   Overlay --> Admin
   OverlayDependency --> Widget
   Widget --> WidgetResource
+  WidgetResource --> ResourceTag
+  ArtDirection --> Overlay
+  ArtDirection --> WidgetResource
+  Recipe --> Overlay
+  Recipe --> Widget
+  Recipe --> DataScraper
   DataFlowResource -. kind of .-> WidgetResource
   Widget --> Template
   DataScraper -->|creates| DataSource
@@ -922,6 +1000,6 @@ graph TD
   classDef missing fill:#ffd9d9,stroke:#a33a3a,color:#541d1d;
 
   class Overlay,OverlayDependency,Widget,WidgetResource,DataScraper,DataRetriever,DataSource,DataFlowResource,WidgetInstance defined;
-  class Template,Placement,Permission,Preview,Render,Admin,Revision,Binding underdefined;
+  class Template,Placement,Permission,Preview,Render,Admin,Revision,Binding,ResourceTag,ArtDirection,Recipe underdefined;
   class Project,Layer,Transform,Credential,Policy,Subscription missing;
 ```

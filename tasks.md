@@ -12,6 +12,7 @@
 
 
 ## Backlog
+- [ ] Implement Art Directions, widget resource tags, bundled starter content, and guided recipe onboarding
 - [ ] Implement the shared external platform plugin contract in the core-facing layers
 - [ ] Implement the first capability-oriented ports for chat events, subscription events, payment events, and social activity events
 - [ ] Implement and iteratively refine the normalized capability event envelope and the first capability-event shapes with real adapter constraints
@@ -25,6 +26,8 @@
 
 
 ## Done
+- [x] Run a behavior-preserving post-validation cleanup pass on the Art Directions, widget resource tags, bundled starter content, and guided recipe onboarding docs
+- [x] Define Art Directions, widget resource tags, bundled starter content, and guided recipe onboarding
 - [x] Add the direct latest-release link to the end-user README
 - [x] Run a behavior-preserving post-validation cleanup pass on README.md and DEVELOPER_README.md to reduce wording drift
 - [x] Reorient the README toward end users and move development workflow docs into a dedicated developer guide

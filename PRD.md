@@ -6,7 +6,7 @@
 
 - NEXIS: the Product Requirements Document
 
-- Version: 1.0.1
+- Version: 1.1.1
 
 ### 1.2 Product summary
 
@@ -24,6 +24,10 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - **Widget resource**: A reusable resource exposed by a widget. Current examples include visual resources, sound resources, animated resources, and data flow resources. A resource may come from static code, local files, or another resource-specific storage shape, and each resource kind may define how it is saved when the widget is exported.
 
+- **Art Direction**: A reusable package of overlays plus design-oriented widget resources, such as images, animated assets, and sounds, that can be imported, exported, and reapplied as one archive so users can reuse or share a coherent visual style.
+
+- **Widget resource tag**: A plugin-authored classification attached to a widget resource to describe what workflows that resource can participate in, such as Art Direction packaging, data-source linkage, or both.
+
 - **Data scraper**: A source-side ingestion component that collects data from a concrete upstream input, formats that collected data into events, and creates exactly one single-domain data source from those events. That data source should contain events from a single coherent event domain. Typical upstream inputs include local processing, watched file contents, commands, APIs, RSS or Atom feeds, and external event streams such as MQTT. A scraper should also be able to emit fake events that follow the same downstream event shape so users and developers can test data flows without waiting for live upstream activity.
 
 - **Data retriever**: A selective aggregation component that subscribes to one or more data sources in a non-destructive way, always depends on at least one upstream data source, and always produces exactly one new downstream data source from the resulting derived event stream.
@@ -33,6 +37,8 @@ The longer-term direction is to turn the project into a packaged single executab
 - **Widget instance**: An overlay-scoped instantiation of a widget. A widget instance keeps a reference to its source widget and updates when that source widget changes. It holds only the configuration that is specific to its use in an overlay, such as opacity, placement, or instance-specific filtering or event-selection rules, and that configuration is saved inside the overlay configuration rather than as a standalone artifact.
 
 - **Overlay dependency**: A widget dependency recorded by an overlay because one of its widget instances was created from that widget. Overlay import or activation should surface the overlay dependency list and still allow the user to continue when some referenced widgets are unavailable.
+
+- **Recipe**: A reusable application-configuration starter that orchestrates one or more overlays, widgets, data scrapers, data retrievers, and related configuration through the app-level shared state so users can begin from guided scenarios instead of from scratch.
 
 - **Data flow resource**: A widget-facing resource that listens to the events of a data source, extracts or transforms those events into values that can hydrate widget fields or other widget inputs, and provides that widget-usable data without creating a new data source. In the admin pipeline editor, only widget fields backed by data flow resources participate as dots.
 
@@ -75,6 +81,8 @@ The longer-term direction is to turn the project into a packaged single executab
 - Publish a render-safe output that matches the operator-approved preview.
 
 - Link upstream accounts securely when external data scrapers need user authorization.
+
+- Start from bundled widgets, data scrapers, and guided recipes instead of an empty system whenever possible.
 
 - Recover safely from mistakes through undo, reset, and future persisted recovery.
 
@@ -184,11 +192,31 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Allow users to configure widgets as reusable assets outside a specific overlay.
 
+  - Ship a default set of widgets with the application so new users have a usable starting library without installing plugins first.
+
   - Allow users to export a widget as a zip package containing its configuration and whatever save format each widget resource exposes.
 
   - Allow users to import a widget package so it becomes available in the admin interface for future widget instances.
 
   - Keep the widget concept extensible so new resource kinds can be introduced in code without redefining the import and export workflow.
+
+  - Let widget resources carry plugin-authored tags such as `art` and `data` so the UI can determine which resources are eligible for Art Direction packaging or data-flow workflows.
+
+  - Keep widget resource tags under plugin and system control rather than user-edited freeform metadata.
+
+- **Art Directions and reusable style packs** (Priority: Medium)
+
+  - Allow users to create, import, export, and reapply an Art Direction as a single archive.
+
+  - Let an Art Direction package overlays together with design-oriented widget resources such as images, animated assets, and sounds.
+
+  - Require Art Directions to declare their dependencies so the UI can show which widgets and resource types they support.
+
+  - When applying an Art Direction, allow users to choose which current widget resources to override.
+
+  - Even when a specific override is skipped, keep imported Art Direction resources available for compatible resource field types covered by that Art Direction.
+
+  - If an imported Art Direction includes overlays whose names already exist, append or increment a numeric suffix rather than overwriting the existing overlays implicitly.
 
 - **Data pipelines and input mapping** (Priority: High)
 
@@ -257,6 +285,20 @@ The longer-term direction is to turn the project into a packaged single executab
   - Support external event pipelines such as third-party APIs, chats, subscriptions, RSS and Atom feeds, and MQTT-like servers.
 
   - Handle missing, stale, or invalid data gracefully.
+
+  - Ship a default set of data scrapers with the application so common starter scenarios work without requiring immediate plugin installation.
+
+- **Starter content and recipe-based onboarding** (Priority: High)
+
+  - Provide a welcome page that offers beginner-friendly bundled recipes as well as import paths for more advanced recipe files.
+
+  - Let recipes orchestrate app-level configuration through the shared state rather than through ad hoc one-off setup logic.
+
+  - Support beginner, intermediate, and advanced recipe shapes, including multi-source and multi-overlay examples.
+
+  - Loading a recipe should run a guided recipe wizard that prompts for any required data-scraper configuration before the recipe is considered ready.
+
+  - When a recipe requires multiple account links, group those links into a single checklist-style wizard step when practical.
 
 - **Preview and visual sandboxing** (Priority: High)
 
@@ -338,6 +380,8 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - First-time users are guided toward a starter enhancement configuration rather than raw technical controls.
 
+- The welcome page should offer bundled starter recipes so new users can begin from recognizable streaming scenarios rather than a blank configuration.
+
 - If no local TLS key and certificate are available, the app offers automatic generation before serving the UI and explains that the generated certificates are self-signed and only suitable for strictly local-machine use.
 
 - The main admin UI is the primary operator-facing product UI.
@@ -356,7 +400,9 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Startup should be predictable and should clearly expose the available product UIs.
 
-- **Create or open an enhancement configuration**: Operators begin from a saved setup, a starter preset, or a new blank state.
+- **Create or open an enhancement configuration**: Operators begin from a saved setup, a bundled starter recipe, or a new blank state.
+
+  - Bundled widgets, bundled data scrapers, and bundled recipes should make the first useful setup reachable without extra plugin installation.
 
   - The first working UI should feel approachable and should not require code knowledge to begin.
 
@@ -367,6 +413,10 @@ The longer-term direction is to turn the project into a packaged single executab
   - Event-pipeline configuration should remain legible through a visual flow editor where scrapers originate flows, retrievers derive new flows, and widget-field dots expose field hydration points.
 
   - When upstream activity is unavailable, scraper-provided fake events should make pipeline and widget behavior testable from the same UI.
+
+- **Load recipes and starter scenarios**: Operators can choose a guided recipe that provisions overlays, widgets, scrapers, and related pipeline state as a starting point.
+
+  - Recipe loading should feel like a guided wizard rather than a raw import of opaque configuration.
 
 - **Preview and refine presentation**: Operators use preview and sandbox UIs to validate visual polish, layout, and readability.
 
@@ -454,7 +504,7 @@ sankey-beta
 
 ## 6. Narrative
 
-A streamer wants to assemble an on-brand set of stream enhancements before going live because the show context, upstream event data, and visual priorities change from session to session. They open NEXIS locally, start from a reusable configuration, link any needed upstream accounts, configure widgets and data mappings, test flows with fake events when live activity is unavailable, refine the presentation in preview and staging, and publish a render-safe live output for streaming software able to compose a web source. The tool works for them because it keeps composition, account linking, preview, staged validation, recovery, and future synchronization in one local workflow instead of scattering those steps across ad hoc edits in streaming software able to compose a web source.
+A streamer wants to assemble an on-brand set of stream enhancements before going live because the show context, upstream event data, and visual priorities change from session to session. They open NEXIS locally, start from a bundled recipe or reusable configuration, link any needed upstream accounts, configure widgets and data mappings, test flows with fake events when live activity is unavailable, refine the presentation in preview and staging, and publish a render-safe live output for streaming software able to compose a web source. The tool works for them because it keeps onboarding, composition, account linking, preview, staged validation, recovery, and future synchronization in one local workflow instead of scattering those steps across ad hoc edits in streaming software able to compose a web source.
 
 ## 7. Success metrics
 
@@ -1033,4 +1083,46 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
   - Missing widgets from that list are clearly identified.
 
   - I can continue importing or activating the overlay even when some widgets are unavailable.
+
+### 10.19. Import, export, or apply an Art Direction
+
+- **ID**: US-019
+
+- **Description**: As a streamer or designer, I want to import, export, and apply an Art Direction so that I can reuse or share a coherent visual style across overlays and widgets.
+
+- **Acceptance criteria**:
+
+  - I can export an Art Direction as a single archive.
+
+  - The archive can include overlays plus design-oriented widget resources such as images, animated assets, and sounds.
+
+  - Importing an Art Direction shows which widgets and resource types it supports through its dependency information.
+
+  - When applying an Art Direction, I can choose which existing widget resources to override.
+
+  - Imported Art Direction resources remain available for compatible resource field types even when I skip a specific override.
+
+  - If imported overlays would collide by name with existing overlays, the imported overlays receive a numeric suffix or increment an existing numeric suffix instead of overwriting the current ones implicitly.
+
+  - Widget resource tags can identify which resources are eligible for Art Direction packaging or reapplication.
+
+### 10.20. Start from bundled recipes and guided onboarding
+
+- **ID**: US-020
+
+- **Description**: As a streamer, I want a welcome page with bundled recipes and a guided recipe wizard so that I can reach a useful setup quickly without building everything from scratch.
+
+- **Acceptance criteria**:
+
+  - The application ships with a default set of widgets and data scrapers for basic starter scenarios.
+
+  - The welcome page offers bundled recipes as well as a way to import a more advanced recipe file.
+
+  - Recipes can provision overlays, widgets, data scrapers, data retrievers, and related shared-state configuration as a starting point.
+
+  - Loading a recipe starts a guided recipe wizard rather than applying opaque changes immediately.
+
+  - If a recipe requires multiple data-scraper account links, the wizard can group those links into one checklist-style step when practical.
+
+  - Beginner, intermediate, and advanced recipe examples can coexist, including multi-source and multi-overlay scenarios.
 
