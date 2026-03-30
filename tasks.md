@@ -34,6 +34,11 @@ For completed task entries, include the local start and end time down to the min
 
 
 ## Done
+- [x] Validate the first runnable slice with targeted tests, compile checks, and HTTPS smoke routes (04:28-04:31)
+- [x] Add targeted tests for the first runnable route and state slice (04:05-04:28)
+- [x] Drive basic staging and render overlay routes from the sample project state (03:40-04:17)
+- [x] Build a first runnable admin shell, route structure, and sample NEXIS project state (03:40-04:17)
+- [x] Run a behavior-preserving post-validation cleanup pass on the first runnable React slice (04:18-04:26)
 - [x] Run a behavior-preserving post-validation cleanup pass on the Scene or composition target removal docs (03:34-03:36)
 - [x] Remove the redundant Scene or composition target missing-concept placeholder (03:32-03:33)
 - [x] Run a behavior-preserving post-validation cleanup pass on the Validation issue docs (03:25-03:27)

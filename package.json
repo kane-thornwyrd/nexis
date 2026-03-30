@@ -16,7 +16,7 @@
     "subbuild:bin:darwin-arm": "bun build --compile --asset-naming=\"[name].[ext]\" --bytecode --target=bun-darwin-arm64 ./src/server.ts --outfile bin/darwin-arm64/nexis.arm.app",
     "build:bin": "run-p -a -b -k -t subbuild:bin:*",
     "build": "run-s subbuild:style build:bin",
-    "start": "NODE_ENV=production bun src/index.ts"
+    "start": "NODE_ENV=production bun src/server.ts"
   },
   "dependencies": {
     "@fontsource-variable/geist": "5.2.8",

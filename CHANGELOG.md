@@ -7,6 +7,8 @@ This file tracks significant changes to the codebase and the goal behind each ch
 Add new entries in reverse chronological order.
 
 ### 2026-03-30
+- Implemented a first runnable NEXIS slice with browser-local project state, real `/admin` subsection routes, a working overlay manager and studio, sample data-flow status surfacing, live `/staging/:overlayId` and `/render/:overlayId` routes, matching server-side SPA routing, and a fixed `start` script that launches the Bun HTTPS server directly.
+  Goal: turn the repository from mostly empty placeholder surfaces into a concrete incomplete product foundation that can be run, tested, and iterated on locally.
 - Tightened the Overlay follow-up docs by stating directly that Overlay is the stream-facing composition target for widget instances, and aligned the changelog and task tracker wording around the removed Scene or composition target missing-concept placeholder.
   Goal: reduce residual wording drift after removing the redundant missing concept without changing the current domain model.
 - Removed the redundant Scene or composition target missing-concept placeholder because Overlay already covers that stream-facing composition role in the current domain model.

@@ -1,6 +1,11 @@
+import { NexisProjectProvider } from "@/app-state";
 import { AppRoutes } from "@/presentation/app/AppRoutes";
 import "@/index.css";
 
 export function App() {
-  return <AppRoutes />;
+  return (
+    <NexisProjectProvider>
+      <AppRoutes />
+    </NexisProjectProvider>
+  );
 }

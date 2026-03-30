@@ -1,6 +1,9 @@
 import {
+  ADMIN_SURFACE_SERVER_PATH,
   ADMIN_SURFACE_PATH,
   RENDER_SURFACE_SERVER_PATH,
+  APP_ROOT_PATH,
+  STAGING_SURFACE_SERVER_PATH,
 } from "@/app-route-paths";
 import { configRoutes } from "./config-routes";
 
@@ -18,8 +21,11 @@ const getHelloRouteRequestHeader = (request: unknown) => {
 
 export const createAppRoutes = <RouteAsset>(indexHTML: RouteAsset) => ({
   ...configRoutes,
+  [APP_ROOT_PATH]: indexHTML,
   [ADMIN_SURFACE_PATH]: indexHTML,
+  [ADMIN_SURFACE_SERVER_PATH]: indexHTML,
   [RENDER_SURFACE_SERVER_PATH]: indexHTML,
+  [STAGING_SURFACE_SERVER_PATH]: indexHTML,
   "/api/hello": {
     GET: () => Response.json({ ok: "List posts" }),
     PUT: (request: unknown) => {

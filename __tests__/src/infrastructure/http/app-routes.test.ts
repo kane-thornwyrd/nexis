@@ -9,7 +9,10 @@ test("createAppRoutes keeps the active SPA routes and config endpoint together",
   const routes = createAppRoutes(indexHTML);
 
   expect(routes["/"]).toBe(indexHTML);
+  expect(routes["/admin"]).toBe(indexHTML);
+  expect(routes["/admin/*"]).toBe(indexHTML);
   expect(routes["/render/*"]).toBe(indexHTML);
+  expect(routes["/staging/*"]).toBe(indexHTML);
   expect("/demo" in routes).toBe(false);
 
   const configRoute = routes["/config.json"];
