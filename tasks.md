@@ -1,18 +1,26 @@
 # Tasks
 
+For completed task entries, include the local start and end time down to the minute next to the task so the time spent on that task is understandable.
+
 ## In Progress
 
 ## To Do
 - [ ] Introduce data scraper, data retriever, data source, and data flow resource foundations as early as possible in the implementation phase
 - [ ] Harden the first event-sourced state milestone around a future admin flow
 - [ ] Expand focused tests around replay, undo, and selector-driven projections
-- [ ] Drive `/render/:OVERLAY_ID` and `/staging/:OVERLAY_ID` from projected `AppState` instead of placeholder routes
+- [ ] Drive the Render projection at `/render/:OVERLAY_ID` and the Preview projection at `/staging/:OVERLAY_ID` from projected `AppState` instead of placeholder routes
 - [ ] Add a history and audit UI that shows command suites and accepted events
 - [ ] Prepare the admin and render UIs for real-time synchronization from a shared domain model
 
 
 ## Backlog
+- [ ] Implement the launch-time Admin UI subsection routes under `/admin`, including `/admin/overlay/edit/:overlayId`, and resolve `/admin` to `/admin/start` for first-time users and to the last Admin UI address stored when an event is appended to the history log for returning users under the current single-local-user assumption
+- [ ] Implement the command-based permission model, plugin-activation permission approval modal, and the Permissions Manager at `/admin/permissions`
+- [ ] Implement Overlay placement snapping zones, layer management, resize and rotation handles, safe-area toggles, and alignment guides in the Overlay Studio
 - [ ] Implement Art Directions, widget resource tags, bundled starter content, and guided recipe onboarding
+- [ ] Implement the Validation issue model and surface issues across forms, the data-flow UI, direct fix actions, and supplemental notifications
+- [ ] Implement data-scraper health reporting, halted data-source behavior, and widget-visible health events
+- [ ] Implement automatic propagation of upstream health, halt, and recovery events through data retrievers and halt retrievers until recovery
 - [ ] Implement the shared external platform plugin contract in the core-facing layers
 - [ ] Implement the first capability-oriented ports for chat events, subscription events, payment events, and social activity events
 - [ ] Implement and iteratively refine the normalized capability event envelope and the first capability-event shapes with real adapter constraints
@@ -26,6 +34,57 @@
 
 
 ## Done
+- [x] Run a behavior-preserving post-validation cleanup pass on the Scene or composition target removal docs (03:34-03:36)
+- [x] Remove the redundant Scene or composition target missing-concept placeholder (03:32-03:33)
+- [x] Run a behavior-preserving post-validation cleanup pass on the Validation issue docs (03:25-03:27)
+- [x] Define Validation issue levels and UI surfacing rules (03:14-03:22)
+- [x] Run a behavior-preserving post-validation cleanup pass on the NEXIS-project root-aggregate docs (03:05-03:07)
+- [x] Define NEXIS project as the main aggregate root for all user-managed configuration (03:00-03:02)
+- [x] Run a behavior-preserving post-validation cleanup pass on the Local TLS asset scope and expiry-handling docs (02:52-02:55)
+- [x] Define Local TLS asset as only the key/certificate pair with delete-and-regenerate expiry handling and no separate operator-facing renewal or trust UX (02:49-02:51)
+- [x] Run a behavior-preserving post-validation cleanup pass on the serialized-format-version mismatch reporting docs (02:38-02:41)
+- [x] Define how import UIs report unsupported serialized format version mismatches (02:35-02:37)
+- [x] Remove the retired Render mode concept from the glossary (02:30-02:32)
+- [x] Run a behavior-preserving post-validation cleanup pass on the mono-stream and Binding clarification docs (02:19-02:20)
+- [x] Clarify mono-stream health events, automatic retriever halting, and Binding as source-selection only (02:08-02:14)
+- [x] Run a behavior-preserving post-validation cleanup pass on the downstream health-propagation docs (01:58-01:59)
+- [x] Define downstream propagation of upstream health and halt events through data retrievers (01:53-01:54)
+- [x] Run a behavior-preserving post-validation cleanup pass on the halted-data-source single-event-stream docs (01:47-01:47)
+- [x] Define health and halt events as part of the data source's single event stream (01:41-01:42)
+- [x] Run a behavior-preserving post-validation cleanup pass on the scraper-health clarification docs (01:36-01:37)
+- [x] Define data-scraper health reporting, halted data sources, and widget-visible health events (01:32-01:34)
+- [x] Clarify Binding scope around source selection versus manual or fallback behavior (01:19-01:21)
+- [x] Run a behavior-preserving post-validation cleanup pass on the Admin UI clarification docs (00:54-00:55)
+- [x] Define Admin UI as the configuration-management workspace and settle its remaining interaction rules (00:47-00:50)
+- [x] Run a behavior-preserving post-validation cleanup pass on the Preview projection and Render projection docs (00:30-00:33)
+- [x] Define Preview projection and Render projection around the staging and live overlay routes (00:27-00:29)
+- [x] Define Enhancement configuration as the editable setup spanning one or more overlays and required data pipeline dependencies (00:14-00:20)
+- [x] Run a behavior-preserving post-validation cleanup pass on the Template docs (23:39-23:42)
+- [x] Define Template as the widget-provided blueprint for widget-instance creation and configuration (23:33-23:38)
+- [x] Run a behavior-preserving post-validation cleanup pass on the core-defined-command permission docs
+- [x] Redefine permissions around core-defined commands and add the Permissions Manager docs
+- [x] Run a behavior-preserving post-validation cleanup pass on the granular plugin-provided permission docs
+- [x] Define granular plugin-provided permissions and permission disclosure behavior
+- [x] Run a behavior-preserving post-validation cleanup pass on the Transform and drag-driven layer-promotion docs
+- [x] Define Transform and drag-driven layer promotion in the Overlay Studio model
+- [x] Run a behavior-preserving post-validation cleanup pass on the Overlay placement and Overlay Studio wording docs
+- [x] Define Overlay placement, layer behavior, and advanced Overlay Studio manipulation rules
+- [x] Run a behavior-preserving post-validation cleanup pass on the recipe archive wording docs
+- [x] Define the recipe archive format and application semantics more precisely
+- [x] Run a behavior-preserving post-validation cleanup pass on the Widget resource tag wording docs
+- [x] Run a behavior-preserving post-validation cleanup pass on the Art Direction archive-shape and apply-modal docs
+- [x] Standardize the Widget resource tag model around core-defined tags only
+- [x] Define the Art Direction archive shape and apply-modal behavior more precisely
+- [x] Run a behavior-preserving post-validation cleanup pass on the `/admin` navigation-model docs
+- [x] Refine the `/admin` route rules around single-user assumptions, history-based return addresses, and parameterized overlay editing
+- [x] Run a behavior-preserving post-validation cleanup pass on the `/admin` redirect-behavior docs
+- [x] Define first-time and returning-user redirect behavior for `/admin`
+- [x] Run a behavior-preserving post-validation cleanup pass on the `/admin` launch-time subsection-route docs
+- [x] Move the Admin UI under `/admin` and define launch-time admin subsection routes
+- [x] Run a behavior-preserving post-validation cleanup pass on the launch-time Admin UI interaction-detail docs
+- [x] Refine the launch-time Admin UI interaction details and manager workflows
+- [x] Run a behavior-preserving post-validation cleanup pass on the launch-time Admin UI section-model docs
+- [x] Define the launch-time Admin UI section model and section-specific operator workflows
 - [x] Run a behavior-preserving post-validation cleanup pass on the Art Directions, widget resource tags, bundled starter content, and guided recipe onboarding docs
 - [x] Define Art Directions, widget resource tags, bundled starter content, and guided recipe onboarding
 - [x] Add the direct latest-release link to the end-user README

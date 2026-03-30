@@ -6,7 +6,7 @@
 
 - NEXIS: the Product Requirements Document
 
-- Version: 1.1.1
+- Version: 7.4.1
 
 ### 1.2 Product summary
 
@@ -14,49 +14,71 @@ NEXIS is a local-first stream enhancer with widgets and data. It is built on Bun
 
 Today the product provides a main admin UI and the first shared-state foundation for local experimentation. For almost all end users, the primary entrypoint should be the bundled executable rather than a Bun-driven developer workflow.
 
-The longer-term direction is to turn the project into a packaged single executable that lets users define enhancement configurations, bind widgets to manual inputs and data flow resources, preview the result, publish consistent render UIs, synchronize updates locally, persist state safely, inspect change history when needed, and serve the local UI over HTTPS with automatically bootstrapped self-signed local TLS assets when none already exist.
+The current product direction assumes one effective local operator profile on one machine rather than active multi-user account management. Multi-user support may exist later, but it is not a current priority.
+
+The longer-term direction is to turn the project into a packaged single executable that lets users create NEXIS projects, define enhancement configurations inside them, bind widgets to manual inputs and data flow resources, preview the result, publish consistent render UIs, synchronize updates locally, persist state safely, inspect change history when needed, and serve the local UI over HTTPS with automatically bootstrapped self-signed local TLS assets when none already exist or the existing pair has expired.
+
+In this document, a NEXIS project is the main aggregate root for all user-managed configuration.
+
+In this document, an enhancement configuration means the operator-facing editable setup inside a NEXIS project, spanning one or more overlays together with all widget instances those overlays contain and all data sources, data scrapers, and data retrievers needed by the data flow resources used by those widget instances.
 
 ### 1.3 First-pass domain model
 
-- **Overlay**: A configuration of widget instances meant to be composed on top of a video stream. It is not a single isolated panel or one-off component. A representative overlay might combine a chat widget instance that merges Twitch and YouTube chat on the right side of the viewport, a now-listening widget instance that shows the current track title and artist at the bottom of the viewport, and a donation-goal widget instance that displays progress toward an Ulule campaign goal. The overlay configuration also carries the widget-instance-specific configuration and an overlay dependency list for the widgets used to create those instances.
+- **NEXIS project**: The main aggregate root for all user-managed configuration. It owns the current enhancement configuration together with the user-managed assets and records around it, such as reusable widgets, overlays, Art Directions, recipes, and credentials or auth grants. It is the top-level thing the application creates, opens, duplicates, resets, saves, or persists for a user.
 
-- **Widget**: A reusable, importable, and exportable source object that proposes to the person creating or modifying an overlay a way to access visual elements or data in that overlay. A widget can hold reusable resources, styles, event reactions, and other reusable behavior that will be shared by the widget instances created from it. Widgets should support both full-configuration save or restore and data-flow-resource-only save or restore, with pipeline import or export using only the latter, and each serialized widget form should carry its own serialized format version string.
+- **Overlay**: A configuration of widget instances meant to be composed on top of a video stream. It is not a single isolated panel or one-off component. A representative overlay might combine a chat widget instance that merges Twitch and YouTube chat toward the right side of the overlay, a now-listening widget instance that shows the current track title and artist near the bottom of the overlay, and a donation-goal widget instance that displays progress toward an Ulule campaign goal. The overlay configuration also carries the widget-instance-specific configuration and an overlay dependency list for the widgets used to create those instances.
+
+- **Enhancement configuration**: The operator-facing editable setup inside a NEXIS project, spanning one or more overlays together with all widget instances those overlays contain and all data sources, data scrapers, and data retrievers needed by the data flow resources used by those widget instances.
+
+- **Widget**: A reusable, importable, and exportable source object that proposes to the person creating or modifying an overlay a way to access visual elements or data in that overlay. A widget can hold reusable resources, styles, event reactions, and other reusable behavior that will be shared by the widget instances created from it. Each widget provides the template used to create and configure its widget instances. Widgets should support both full-configuration save or restore and data-flow-resource-only save or restore, with pipeline import or export using only the latter, and each serialized widget form should carry its own serialized format version string.
 
 - **Widget resource**: A reusable resource exposed by a widget. Current examples include visual resources, sound resources, animated resources, and data flow resources. A resource may come from static code, local files, or another resource-specific storage shape, and each resource kind may define how it is saved when the widget is exported.
 
 - **Art Direction**: A reusable package of overlays plus design-oriented widget resources, such as images, animated assets, and sounds, that can be imported, exported, and reapplied as one archive so users can reuse or share a coherent visual style.
 
-- **Widget resource tag**: A plugin-authored classification attached to a widget resource to describe what workflows that resource can participate in, such as Art Direction packaging, data-source linkage, or both.
+- **Widget resource tag**: A core-standardized classification attached to a widget resource to describe what workflows that resource can participate in. The allowed tags are `art`, `data`, and Art Direction provenance tags derived from Art Direction names, with reserved-name collisions such as `art` or `data` escaped by turning the provenance tag into `[name] + Art Direction`.
 
-- **Data scraper**: A source-side ingestion component that collects data from a concrete upstream input, formats that collected data into events, and creates exactly one single-domain data source from those events. That data source should contain events from a single coherent event domain. Typical upstream inputs include local processing, watched file contents, commands, APIs, RSS or Atom feeds, and external event streams such as MQTT. A scraper should also be able to emit fake events that follow the same downstream event shape so users and developers can test data flows without waiting for live upstream activity.
+- **Data scraper**: A source-side ingestion component that collects data from a concrete upstream input, formats that collected data into events, and creates exactly one single-domain data source from those events. That data source should contain events from a single coherent event domain. Typical upstream inputs include local processing, watched file contents, commands, APIs, RSS or Atom feeds, and external event streams such as MQTT. A scraper should also be able to emit fake events that follow the same downstream event shape so users and developers can test data flows without waiting for live upstream activity. Each scraper should report its own health using source-specific checks that matter for its concrete upstream input, should judge whether the data source it produces is still healthy enough to be useful, and should emit a recovery health event in that same event stream when the source becomes healthy enough again.
 
-- **Data retriever**: A selective aggregation component that subscribes to one or more data sources in a non-destructive way, always depends on at least one upstream data source, and always produces exactly one new downstream data source from the resulting derived event stream.
+- **Data retriever**: A selective aggregation component that subscribes to one or more data sources in a non-destructive way, always depends on at least one upstream data source, and always produces exactly one new downstream data source from the resulting derived event stream. Its filtering and transformation logic should apply only to the targeted ordinary events it is meant to process. Health, halt, and recovery propagation downstream is automatic pipeline behavior rather than retriever-specific transformation logic. If any upstream data source it depends on remains halted or unhealthy, the retriever process should itself be halted until that upstream source emits a recovery health event again.
 
-- **Data source**: A source of events created by a data scraper or a data retriever. A data source should represent a single coherent event domain. Data sources are the event-stream abstraction that downstream data retrievers and data flow resources can listen to.
+- **Data source**: A source of events created by a data scraper or a data retriever. A data source should represent a single coherent event domain. Data sources are the event-stream abstraction that downstream data retrievers and data flow resources can listen to. Each data source has one event stream rather than a separate health-status channel beside its ordinary events. When a scraper judges the health of its produced data source to be too poor for useful operation, that data source should be considered halted and should emit a health or halt event in that event stream so widgets can surface understandable degraded behavior. If that source later becomes healthy enough again, it should emit a recovery health event in that same event stream. When automatic propagation carries an upstream health, halt, or recovery event through a data retriever, it should do so through the downstream data source's same event stream.
 
 - **Widget instance**: An overlay-scoped instantiation of a widget. A widget instance keeps a reference to its source widget and updates when that source widget changes. It holds only the configuration that is specific to its use in an overlay, such as opacity, placement, or instance-specific filtering or event-selection rules, and that configuration is saved inside the overlay configuration rather than as a standalone artifact.
 
 - **Overlay dependency**: A widget dependency recorded by an overlay because one of its widget instances was created from that widget. Overlay import or activation should surface the overlay dependency list and still allow the user to continue when some referenced widgets are unavailable.
 
-- **Recipe**: A reusable application-configuration starter that orchestrates one or more overlays, widgets, data scrapers, data retrievers, and related configuration through the app-level shared state so users can begin from guided scenarios instead of from scratch.
+- **Recipe**: A reusable application-configuration starter that orchestrates one or more overlays, widgets, data scrapers, data retrievers, and related configuration through the app-level shared state so users can begin from guided scenarios instead of from scratch. Recipe imports and exports should use a recipe archive format centered on a main TypeScript recipe file that builds the next app state by issuing commands comparable to the ones the UI would trigger.
 
 - **Data flow resource**: A widget-facing resource that listens to the events of a data source, extracts or transforms those events into values that can hydrate widget fields or other widget inputs, and provides that widget-usable data without creating a new data source. In the admin pipeline editor, only widget fields backed by data flow resources participate as dots.
 
-- **Binding**: An element-owned derived configuration held on data retrievers, data flow resources, and widget-facing configuration rather than as a separate saved diagram object. Retriever configurations persist their own upstream-data-source binding identifiers, data flow resource configurations persist their own ingested-data-source binding identifiers, widget-side configuration persists its own referenced data-source identifiers, and pipeline import or export uses an archive of each element's own serialized format plus a lightweight manifest rather than inventing a separate whole-diagram binding schema.
+- **Binding**: The first-pass source-selection rule that a widget field listens to a specific data flow resource or source. Binding identifiers persist on the owning data flow resources rather than as separate diagram-only connection objects, and pipeline import or export uses an archive of each element's own serialized format plus a lightweight manifest rather than inventing a separate whole-diagram binding schema. Manual inputs, fallback values, and degraded behavior are outside the meaning of binding.
 
 - **Pipeline archive manifest**: A lightweight index file included in a whole-diagram pipeline configuration zip archive. In the first pass it should be stored as `manifest.json` at the root of that archive. It should declare `archiveFormatVersion`, `exportedAt`, `sourceAppVersion`, and one entry per participating exported element, where each entry includes `id`, `type`, `name`, archive-relative `file` path, `serializer`, serialized `formatVersion`, `dependencies`, and widget save or restore `mode` when relevant.
 
-- **Serialized format version**: A version string carried by any importable or exportable artifact to describe the structure of its serialized data independently from the app version. Widgets, data scrapers, data retrievers, data flow resources, plugin-provided artifacts, and future importable or exportable artifact kinds should each expose one when they support save or restore or import or export. NEXIS should treat that value as an opaque compatibility label rather than assuming semantic versioning or monotonic ordering, and migration remains the responsibility of the artifact or plugin author rather than the core app.
+- **Serialized format version**: A version string carried by any importable or exportable artifact to describe the structure of its serialized data independently from the app version. Widgets, data scrapers, data retrievers, data flow resources, plugin-provided artifacts, and future importable or exportable artifact kinds should each expose one when they support save or restore or import or export. NEXIS should treat that value as an opaque compatibility label rather than assuming semantic versioning or monotonic ordering, and migration remains the responsibility of the artifact or plugin author rather than the core app. When an artifact loader or plugin rejects an unsupported serialized format version string, the import UI should surface that as a version-mismatch form error and may supplement that required form error with a toast or browser notification when appropriate.
 
-- **Template**: The rendering or behavior definition a widget uses to turn its data into visible output or other widget behavior. In most cases, a renderable widget displays a template filled with current data.
+- **Template**: The widget-provided blueprint that defines what a widget contributes when creating its widget instances. A template defines the render or behavior structure used by those instances and the instance-side configuration form used to configure them.
 
-- **Viewport placement**: The placement rules that determine where a renderable widget appears in the output viewport. Typical placements include a right-side chat rail, a bottom now-listening bar, or a floating donation-goal module.
+- **Overlay placement**: The placement rules that determine where a widget instance appears inside an overlay. Overlay placement should support named snapping zones, free placement, stored offsets with units, and remembered snapped zones so widget instances remain stable when overlay dimensions change.
 
-- **Permission**: An explicit capability granted to a widget. Permissions may allow access to protected inputs or controlled actions, such as altering the current overlay or switching which overlay is displayed.
+- **Layer**: The ordered compositing level that determines how widget instances stack inside an overlay. Higher layer numbers should render above lower layer numbers, with layer numbering starting at `0`.
+
+- **Transform**: The widget-instance-specific geometry state that controls resizing and rotation around a rotation center. The rotation center should default to the center of the widget instance, stay relative to the widget instance position, and be movable by the user.
+
+- **Permission**: An explicit authorization for a concrete plugin-provided element to call a specific core-defined command. Plugin authors declare which core-defined commands their elements request, and commands that alter application state must provide human-readable descriptions so operators can understand the permission they are granting.
 
 - **Overlay revision and publication state**: A distinction between in-progress, staged, and live overlay states. In the current direction, `/staging/:OVERLAY_ID` should expose the staged version of an overlay for validation, while `/render/:OVERLAY_ID` should expose the live version intended for actual use.
 
+- **Preview projection**: The staged overlay output exposed at `/staging/:OVERLAY_ID` for validation without wrapping the overlay in the Admin UI.
+
+- **Render projection**: The finalized published overlay output exposed at `/render/:OVERLAY_ID` for read-only consumption without wrapping the overlay in the Admin UI.
+
 - **Credential or auth grant**: The stored authorization material that lets a data scraper or external-platform adapter access a user's upstream account or API on that user's behalf. It may represent OAuth2 tokens, API keys, or other provider-specific authorization artifacts, should be linkable and revocable from the UI, and should prefer OAuth2-style authorization when the upstream provider supports it.
+
+- **Local TLS asset**: The locally scoped private key and certificate pair the packaged runtime uses to serve the local UI over HTTPS on the same machine. It should not expand to adjacent metadata such as expiry, fingerprint, or generation provenance. If the existing local TLS assets are expired, the runtime should delete them and regenerate a fresh local pair rather than introducing separate operator-facing renewal or trust-management UX.
+
+- **Validation issue**: An explicit warning, error, or blocking issue attached to a user-managed element, field, or workflow state when the application detects invalid configuration, degraded behavior, or another condition the operator should understand. Validation issues should support at least warning, error, and blocking levels, should be shown with clear explanations, may offer a direct fix action when possible, should appear near the relevant form field when they are form-bound, should appear in the data-flow UI when they concern pipeline state, and may be supplemented by toast or browser-notification feedback when appropriate without replacing the primary in-context display.
 
 ## 2. Goals
 
@@ -96,6 +118,8 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - Finalizing the long-term backend API or transport contract before the product needs it.
 
+- Prioritizing multi-user account management or concurrent-user workflows in the current local-first phase.
+
 - Delivering a broad visual redesign unrelated to operator workflows and product direction.
 
 - Treating the current placeholder render-route implementation as the final render and staging experience.
@@ -126,7 +150,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
 ### 3.3 Role-based access
 
-- **Streamers/Admins**: Can access admin-oriented UIs such as `/`, manage the current enhancement configuration, use undo and reset, and eventually inspect history or audit information.
+- **Streamers/Admins**: Can access admin-oriented UIs under `/admin`, manage the current NEXIS project and its enhancement configuration, use undo and reset, and eventually inspect history or audit information.
 
 - **Render viewers**: Can load render routes intended for viewing output only and should not be able to modify the underlying state.
 
@@ -138,13 +162,15 @@ The longer-term direction is to turn the project into a packaged single executab
 
 ## 4. Functional requirements
 
-- **Enhancement configuration management** (Priority: High)
+- **NEXIS project and enhancement configuration management** (Priority: High)
 
-  - Allow users to create, open, duplicate, reset, and eventually save local stream-enhancement configurations.
+  - Allow users to create, open, duplicate, reset, and eventually save NEXIS projects.
 
-  - Keep a clear distinction between the currently edited configuration and any published render output.
+  - Keep a clear distinction between the current enhancement configuration being edited inside a NEXIS project and any published render output.
 
   - Provide a safe default starting state for first-time usage.
+
+  - Surface validation issues clearly when the current NEXIS project or enhancement configuration contains invalid, degraded, or blocked state.
 
   - Display the overlay dependency list for an overlay configuration.
 
@@ -158,11 +184,15 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Detect whether local TLS assets already exist in the system folders used by the application.
 
+  - If the existing local TLS assets are expired, delete them and regenerate a fresh local pair instead of renewing them in place.
+
   - If local TLS assets are missing, offer to generate them automatically by using whatever certificate-generation capability is available on the host platform.
 
   - Store generated local TLS assets in the system folders used by the application.
 
   - Warn clearly that any auto-generated local TLS certificate is self-signed, intended only for strictly local-machine use, and should not be used to expose the application on any network.
+
+  - Keep that expiration handling inside the local HTTPS bootstrap path rather than adding separate operator-facing renewal or trust-management UX.
 
 - **UI action ergonomics** (Priority: Medium)
 
@@ -172,11 +202,55 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - When labels are hidden, require tooltips or equivalent accessible names so actions remain understandable and discoverable.
 
+- **Admin UI information architecture** (Priority: High)
+
+  - Treat the main admin UI as a structured operator workspace rather than one undifferentiated screen.
+
+  - Treat the Admin UI as the explicit configuration-management workspace where operators manage the current NEXIS project, its enhancement configuration, plugins, overlays, Art Directions, recipes, permissions, and history.
+
+  - Make `/admin` the canonical admin entrypoint and redirect `/` to `/admin`.
+
+  - At launch, provide distinct Admin UI sections for the Welcome page, General settings, Plugin management, Permissions Manager, Overlay Studio, Overlay Manager, Data Flow Admin UI, History log, and Art Direction Manager.
+
+  - At launch, map those sections to the Admin UI subsection routes `/admin/start`, `/admin/settings`, `/admin/plugins`, `/admin/permissions`, `/admin/overlay/edit/:overlayId`, `/admin/overlay`, `/admin/data`, `/admin/log`, and `/admin/arts`.
+
+  - Resolve `/admin` to `/admin/start` for first-time users and to the last Admin UI address that was stored when an event was appended to the history log for returning users.
+
+  - Keep the exact section-navigation form open for now, such as tabs, menus, or another navigation pattern, while preserving those launch-time responsibilities.
+
+  - Make the Welcome page the first destination on first launch.
+
+  - Allow later development to make section order user-reorderable if that does not weaken first-time onboarding.
+
+  - Keep the Welcome page pinned as the first section even if later versions allow other sections to be reordered.
+
+- **General application settings** (Priority: Medium)
+
+  - Allow users to configure user-facing app settings such as language, system folders, and local server settings from the UI.
+
+  - When server-facing settings such as the local port are changed, signal the local server to restart in a controlled way instead of requiring manual restarts.
+
+  - During that restart, show a blocking reconnecting modal until the UI becomes available at its new address.
+
+  - After reconnecting, return the user to the same application location they were using before the restart.
+
+  - The reconnecting modal may optionally contain a small easter-egg interaction, but that interaction must not weaken the clarity of the restart flow and should remain explicitly exitable.
+
+- **Plugin management** (Priority: Medium)
+
+  - Let users inspect installed plugins, install plugins from a local file or URL, update plugins, and remove plugins from the UI.
+
+  - Require plugins to expose a version string and changelog information for their updates.
+
+  - Let plugins declare pure, composable migration functions between adjacent supported versions so skipped-version upgrades can compose those migrations safely.
+
+  - Preserve enough plugin-version lineage information that the app can migrate plugin-owned data without forcing users through each intermediate plugin release manually.
+
 - **Widget composition and layout** (Priority: High)
 
   - Allow users to create, remove, enable, disable, and reorder widget instances or other overlay modules.
 
-  - Treat an overlay as a composition of multiple widget instances arranged across the video viewport rather than as a single widget.
+  - Treat an overlay as a composition of multiple widget instances arranged within the overlay surface rather than as a single widget.
 
   - Treat widget instances as positionable overlay elements, while still allowing some widgets to remain non-renderable reusable sources for those instances.
 
@@ -187,6 +261,62 @@ The longer-term direction is to turn the project into a packaged single executab
   - Support placements such as a right-side chat rail, a bottom now-listening bar, or a floating donation-goal module.
 
   - Reflect composition changes in preview before publication.
+
+  - Provide an Overlay Studio as the WYSIWYG editing surface for a single overlay.
+
+  - Let users drag widgets from a widget palette into the overlay to create widget instances.
+
+  - Let users reposition widget instances directly in the overlay surface and also edit widget-instance configuration, including position, through modal forms.
+
+  - Support Overlay placement snapping zones at top-left, top-center, top-right, middle-left, middle-center, middle-right, bottom-left, bottom-center, and bottom-right.
+
+  - Show visual snapping hints while dragging widget instances and allow temporary snapping bypass with a modifier such as `Shift`.
+
+  - Let widget instances snap both to overlay zones and to nearby widget instances.
+
+  - Allow free placement while still snapping to the closest target when it falls within a configurable snapping distance defined in General settings.
+
+  - Store widget-instance position as number-plus-unit offsets from the top-left corner, with pixels and percentages supported and percentages used by default.
+
+  - Remember which snapping zone a widget instance used so placement remains semantically stable when overlay dimensions change.
+
+  - Provide a layer system where widget instances render in ascending layer order, with higher layers displayed above lower ones.
+
+  - Let the Overlay Studio show a layer list, reorder layers by drag and drop, and highlight the pending drop position while dragging.
+
+  - Let operators lock or hide layers in the Overlay Studio.
+
+  - Let operators change a widget instance layer through the layer list, through the widget-instance configuration form, or through shortcuts such as `Alt+PageUp` and `Alt+PageDown`.
+
+  - If a widget instance is dragged above another widget instance in the overlay surface, promote it to the upper layer; if no higher layer exists yet, create one.
+
+  - Let widget instances be resized with square corner handles.
+
+  - Let widget instances be rotated with a dedicated rotation handle placed on the side closest to the overlay center.
+
+  - Let operators move the center of rotation through a dedicated handle.
+
+  - Treat resizing and rotation as Transform behavior, while ordinary dragging changes overlay placement without altering the current rotation.
+
+  - Keep the rotation center relative to the widget instance position so moving the widget instance does not change where its transform origin sits inside that widget instance.
+
+  - Allow rotation around a moved rotation center even when that changes both the final rotation and the final displayed position of the widget instance.
+
+  - Let the Overlay Studio expose a toggle for displaying EBU R 95 safe areas.
+
+  - Show temporary pixel alignment guides while dragging widget instances so users can align edges and centers relative to nearby widget instances.
+
+  - Let users open widget-editing forms from the widget palette to configure reusable widget resources.
+
+  - Require a user-editable overlay name, but generate a default name from the current date and time when the user leaves the name blank.
+
+  - Let the overlay edit flow configure dimensions and orientation, with portrait chosen automatically when validated dimensions are taller than wide.
+
+  - Show a simple publication-state indicator for whether an overlay is saved, staged, or live.
+
+  - Provide an Overlay Manager separate from the Overlay Studio so users can browse existing overlays, create new ones, inspect them, edit them, delete them with confirmation, and change publication state with confirmation.
+
+  - Let overlay inspection surface lower-level details such as widget instances used by the overlay and the data sources that currently feed it.
 
 - **Widget library and portability** (Priority: Medium)
 
@@ -200,15 +330,17 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Keep the widget concept extensible so new resource kinds can be introduced in code without redefining the import and export workflow.
 
-  - Let widget resources carry plugin-authored tags such as `art` and `data` so the UI can determine which resources are eligible for Art Direction packaging or data-flow workflows.
+  - Let widget resources carry only the core-standardized tags `art`, `data`, and Art Direction provenance tags so the UI can determine which resources are eligible for Art Direction packaging or data-flow workflows.
 
-  - Keep widget resource tags under plugin and system control rather than user-edited freeform metadata.
+  - Keep widget resource tags under core and system control rather than user-edited freeform metadata or plugin-defined custom tag vocabularies.
 
 - **Art Directions and reusable style packs** (Priority: Medium)
 
   - Allow users to create, import, export, and reapply an Art Direction as a single archive.
 
   - Let an Art Direction package overlays together with design-oriented widget resources such as images, animated assets, and sounds.
+
+  - Structure that archive around a manifest with the usual archive metadata plus the selected widget resources tagged as `art`, with each selected resource exported through its own settings-export mechanism.
 
   - Require Art Directions to declare their dependencies so the UI can show which widgets and resource types they support.
 
@@ -218,11 +350,23 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - If an imported Art Direction includes overlays whose names already exist, append or increment a numeric suffix rather than overwriting the existing overlays implicitly.
 
+  - Do not introduce Art Direction revision management by default.
+
+  - Re-applying an Art Direction should open a modal flow that lists the impacted widgets and lets the user choose with one checkbox per widget which ones receive the Art Direction settings.
+
 - **Data pipelines and input mapping** (Priority: High)
 
   - Allow data scrapers to collect and format events from local processing, watched file contents, commands, APIs, RSS or Atom feeds, and external event streams such as MQTT, and create exactly one single-domain data source from those events.
 
   - Keep the data source created by a data scraper scoped to a single coherent event domain, such as chat-message events or follow-notification events rather than a mixed upstream bundle.
+
+  - Require each data scraper to report health using source-specific checks that matter for its concrete upstream input.
+
+  - Let each data scraper decide when the health of its produced data source has become too poor for that source to remain useful.
+
+  - When scraper health becomes too poor, treat the produced data source as halted and emit a health or halt event in that data source's event stream so widgets can use it to surface understandable degraded behavior.
+
+  - When a halted or unhealthy data source becomes healthy enough again, emit a recovery health event in that same event stream.
 
   - Let data scrapers expose fake-event generation so users and developers can test data flows, widgets, and retrievers without waiting for real upstream events or consuming API credits.
 
@@ -230,9 +374,17 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Allow data retrievers to subscribe to one or more data sources in a non-destructive way, require at least one upstream data source per retriever, and produce exactly one new downstream data source per retriever.
 
+  - Make propagation of upstream health, halt, and recovery events through data retrievers automatic pipeline behavior rather than retriever-specific transformation logic.
+
+  - Halt a data retriever's processing while any upstream data source it depends on remains halted or unhealthy.
+
+  - Resume that retriever only after the affected upstream data source emits a recovery health event.
+
   - Provide an admin-UI pipeline editor where data scrapers are the origins of flows, data retrievers are nodes that can sit on one flow or across multiple flows, and retrievers always create one new downstream flow without consuming the upstream ones.
 
   - Use that pipeline editor as the primary configuration UI for event-driven widget hydration, while keeping the persisted shared configuration on the underlying data scrapers, data retrievers, data flow resources, widgets, and widget instances rather than in a separately saved diagram artifact.
+
+  - Let the pipeline editor go beyond inspection into direct manipulation and configuration.
 
   - Compute retriever-node positions dynamically from the data sources they depend on and the next downstream dependency or end of the diagram, with a default midpoint placement between those dependency boundaries rather than persisting retriever positions as part of retriever configuration.
 
@@ -241,6 +393,8 @@ The longer-term direction is to turn the project into a packaged single executab
   - Allow operators to trigger scraper-provided fake events from the UI, with those events flowing through the same downstream pipeline paths as live events.
 
   - Allow operators to route upstream flows into retriever nodes and create, update, or delete retrievers through node-driven modal dialogs.
+
+  - Allow operators to assign data flow resources by dragging and dropping them from a palette of widgets that expose data flow resources.
 
   - Allow import and export of individual retriever configurations using each retriever's own serialized format.
 
@@ -258,7 +412,13 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Let each participating element keep its own serialized import or export format and its own serialized format version string, and use archive composition rather than inventing a separate whole-diagram binding schema.
 
+  - Surface form-related validation issues near the field that caused them.
+
+  - Surface data-flow-related validation issues in the Sankey or alluvial pipeline interface as the primary in-context display and optionally supplement them with toast or browser-notification feedback when appropriate.
+
   - Require any importable or exportable artifact, including plugin-provided artifacts, to carry its own serialized format version string so structural compatibility checks can be delegated to the relevant artifact or plugin author when data structures evolve.
+
+  - When an artifact loader or plugin rejects an unsupported serialized format version string, surface the mismatch as a version-mismatch form error in the import UI and optionally supplement that required form error with a toast or browser notification when appropriate.
 
   - Require widgets to support both full-configuration save or restore and data-flow-resource-only save or restore, with the pipeline editor using only the data-flow-resource-only mode.
 
@@ -274,7 +434,7 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Make data scraper, data retriever, data source, and data flow resource support available as early as possible in the implementation phase because multiple widget behaviors depend on them.
 
-  - Support template-oriented widgets that render processed data rather than only static content.
+  - Support widgets whose templates define widget-instance creation, widget-instance configuration forms, and rendering of processed data rather than only static content.
 
   - Support mapping data from data flow resources into widget properties without requiring direct code edits.
 
@@ -290,15 +450,27 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - **Starter content and recipe-based onboarding** (Priority: High)
 
-  - Provide a welcome page that offers beginner-friendly bundled recipes as well as import paths for more advanced recipe files.
+  - Provide a welcome page that offers beginner-friendly bundled recipes as well as import paths for more advanced recipe archives.
+
+  - Let the welcome page expose a recipe-import drop zone as an onboarding path for more advanced users.
 
   - Let recipes orchestrate app-level configuration through the shared state rather than through ad hoc one-off setup logic.
+
+  - Use a recipe archive format so a recipe can be imported or exported as a single file.
+
+  - Center that recipe archive on a main TypeScript recipe file that builds the next app state by issuing commands comparable to the ones the UI would trigger.
 
   - Support beginner, intermediate, and advanced recipe shapes, including multi-source and multi-overlay examples.
 
   - Loading a recipe should run a guided recipe wizard that prompts for any required data-scraper configuration before the recipe is considered ready.
 
   - When a recipe requires multiple account links, group those links into a single checklist-style wizard step when practical.
+
+  - Applying a recipe should always create new overlays, using the existing numeric-suffix naming rule when overlay names collide.
+
+  - Applying or re-applying a recipe should override data scrapers, data retrievers, and widget configurations with the recipe-defined configuration rather than attempting to merge user customizations.
+
+  - Re-applying a recipe after the user customizes the generated configuration should restore the recipe-defined configuration as the sane default.
 
 - **Preview and visual sandboxing** (Priority: High)
 
@@ -310,15 +482,15 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - **Render delivery** (Priority: High)
 
-  - Give each overlay its own live route at `/render/:OVERLAY_ID`.
+  - Give each overlay its own live Render projection route at `/render/:OVERLAY_ID`.
 
-  - Give each overlay its own staging route for validation at `/staging/:OVERLAY_ID`.
+  - Give each overlay its own staged Preview projection route for validation at `/staging/:OVERLAY_ID`.
 
   - Drive both route families from the shared projected state rather than from isolated implementations.
 
   - Keep render routes optimized for streaming software able to compose a web source.
 
-  - Keep the staging route separate from the live route so operators can validate in-progress overlay changes without replacing the live output immediately.
+  - Keep the staging route separate from the live route so operators can validate the staged Preview projection without replacing the live Render projection immediately.
 
 - **State history, undo, and audit** (Priority: High)
 
@@ -330,13 +502,31 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Provide enough structured history to support a future audit UI and troubleshooting workflow.
 
-- **Widget permissions and control behavior** (Priority: Medium)
+  - Present history restoration with unusually strong warnings so users understand that restoring past state is not a harmless time-travel preview.
 
-  - Allow specific widgets to be granted permission to alter the current overlay state or switch which overlay is currently displayed.
+- **Plugin-provided permissions and command authorization** (Priority: Medium)
 
-  - Keep widget permissions explicit, auditable, and revocable.
+  - Let plugin authors declare which core-defined commands their widgets, data scrapers, and other plugin-provided elements request.
 
-  - Prevent unprivileged widgets from mutating overlay selection or other protected global behavior.
+  - Treat a permission as authorization to call a specific core-defined command.
+
+  - Require commands that alter application state to expose a human-readable and understandable description.
+
+  - Show requested permissions when the user adds a widget to an overlay, activates a plugin, or otherwise activates a permission-bearing element.
+
+  - Show current permissions in an element-specific configuration UI, including the widget-instance configuration UI, so the user can review and change them.
+
+  - Provide a Permissions Manager in the Admin UI that shows commands on one axis, permission-bearing elements on the other axis, and the current permission state at each intersection.
+
+  - Let operators grant or revoke command permissions from that Permissions Manager through explicit checkbox controls.
+
+  - Allow specific plugin-provided elements, including widget instances, to be granted permission to alter the current overlay state or switch which overlay is currently displayed.
+
+  - Keep plugin-provided permissions explicit, auditable, and revocable.
+
+  - Keep command permissions as granular as practical.
+
+  - Prevent unprivileged elements from mutating overlay selection or other protected global behavior.
 
 - **Persistence and recovery** (Priority: Medium)
 
@@ -350,9 +540,15 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Propagate accepted admin changes to render UIs in real time.
 
-  - Keep admin, preview, and render projections consistent.
+  - Keep the admin UI, Preview projection, and Render projection consistent.
 
   - Recover cleanly from temporary synchronization interruptions.
+
+- **Admin UI local persistence** (Priority: Medium)
+
+  - Persist preferences by default when they affect application state or application configuration.
+
+  - Delegate preferences that affect only the Admin UI layout to browser-local storage unless a stronger persistence requirement is specified.
 
 - **Access control and runtime administration** (Priority: Medium)
 
@@ -376,21 +572,31 @@ The longer-term direction is to turn the project into a packaged single executab
 
 - End users start the app primarily through the bundled executable and arrive at the admin UI.
 
+- The root route `/` should redirect to `/admin` rather than acting as the long-term operator home.
+
 - NEXIS maintainers and plugin developers may also use `bun dev`, but that workflow should not be treated as the primary first-time-user path.
 
 - First-time users are guided toward a starter enhancement configuration rather than raw technical controls.
 
 - The welcome page should offer bundled starter recipes so new users can begin from recognizable streaming scenarios rather than a blank configuration.
 
-- If no local TLS key and certificate are available, the app offers automatic generation before serving the UI and explains that the generated certificates are self-signed and only suitable for strictly local-machine use.
+- If no local TLS key and certificate are available, or the existing pair has expired, the app handles local HTTPS bootstrap by generating or regenerating a fresh self-signed local pair and explains that the generated certificates are self-signed and only suitable for strictly local-machine use.
 
-- The main admin UI is the primary operator-facing product UI.
+- The main admin UI is the primary operator-facing configuration-management workspace.
+
+- `/admin` should be the canonical admin entrypoint.
+
+- At launch, the admin UI should be split into distinct sections for the Welcome page, General settings, Plugin management, Permissions Manager, Overlay Studio, Overlay Manager, Data Flow Admin UI, History log, and Art Direction Manager.
+
+- At launch, those sections should use the Admin UI subsection routes `/admin/start`, `/admin/settings`, `/admin/plugins`, `/admin/permissions`, `/admin/overlay/edit/:overlayId`, `/admin/overlay`, `/admin/data`, `/admin/log`, and `/admin/arts`.
+
+- First-time users should land on `/admin/start`, while returning users should land on the last Admin UI address that was stored when an event was appended to the history log.
 
 - When external data scrapers need account access, the UI should guide users through linking those accounts with clear permission explanations and revocation paths.
 
-- Users define or open the current enhancement configuration, connect or enter the data it needs, and preview the result.
+- Users create or open a NEXIS project, work on the current enhancement configuration inside it, connect or enter the data it needs, and preview the result.
 
-- Users can open `/staging/:OVERLAY_ID` to validate in-progress overlay changes and `/render/:OVERLAY_ID` to inspect the live output.
+- Users can open `/staging/:OVERLAY_ID` to validate a staged Preview projection and `/render/:OVERLAY_ID` to inspect the live Render projection.
 
 - Users discover reset, undo, and future save/load affordances early so experimentation feels safe.
 
@@ -400,11 +606,25 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Startup should be predictable and should clearly expose the available product UIs.
 
-- **Create or open an enhancement configuration**: Operators begin from a saved setup, a bundled starter recipe, or a new blank state.
+  - If the operator opens `/`, the app should redirect them to `/admin`.
+
+  - The first-launch landing experience should resolve to `/admin/start` with onboarding and starter-recipe entry points.
+
+  - Returning operators should be sent to the last Admin UI address that was stored when an event was appended to the history log.
+
+- **Create or open a NEXIS project**: Operators begin from a saved project, a bundled starter recipe, or a new blank project.
 
   - Bundled widgets, bundled data scrapers, and bundled recipes should make the first useful setup reachable without extra plugin installation.
 
   - The first working UI should feel approachable and should not require code knowledge to begin.
+
+- **Manage global app behavior**: Operators configure language, system folders, and local runtime settings through General settings rather than through raw files or environment variables.
+
+  - Changing server-facing settings should feel controlled and reversible, even when it requires a restart.
+
+- **Manage plugins**: Operators inspect installed plugins, install or remove them, and understand plugin version and migration information from the UI.
+
+  - Plugin updates should not feel like opaque binary swaps that risk silent data loss.
 
 - **Configure widgets and data mappings**: Operators choose reusable widgets, create widget instances from them, define how those instances are arranged, and decide which manual inputs or data flow resources drive those widget instances.
 
@@ -413,6 +633,14 @@ The longer-term direction is to turn the project into a packaged single executab
   - Event-pipeline configuration should remain legible through a visual flow editor where scrapers originate flows, retrievers derive new flows, and widget-field dots expose field hydration points.
 
   - When upstream activity is unavailable, scraper-provided fake events should make pipeline and widget behavior testable from the same UI.
+
+- **Edit overlays visually**: Operators use the Overlay Studio to lay out widget instances directly on an overlay and open modal forms for lower-level configuration.
+
+  - Direct manipulation and form-based editing should complement each other instead of competing.
+
+- **Manage overlays as assets**: Operators use the Overlay Manager to browse, inspect, edit, publish, or delete overlays with clear state indicators and confirmations for risky actions.
+
+  - Saved, staged, and live state should stay legible at a glance.
 
 - **Load recipes and starter scenarios**: Operators can choose a guided recipe that provisions overlays, widgets, scrapers, and related pipeline state as a starting point.
 
@@ -430,15 +658,21 @@ The longer-term direction is to turn the project into a packaged single executab
 
   - Recovery and persistence flows should make experimentation safe instead of risky.
 
+  - History restoration warnings should be dramatic enough that users understand the consequences before they proceed.
+
 ### 5.3. Advanced features & edge cases
 
 - Missing or stale data should fall back gracefully rather than breaking the preview or render output.
 
+  - Data scrapers should report source-specific health clearly, and widgets should be able to surface understandable degraded behavior when a required data source is halted for health reasons through that source's event stream.
+
 - Non-renderable widget instances should remain configurable and visible in the overlay list even when they do not draw directly into the viewport.
 
-- Widgets that can alter overlay state or active-overlay selection should be permission-gated and auditable.
+- Plugin-provided elements that can alter overlay state or active-overlay selection should be permission-gated and auditable.
 
 - Widget configurations should validate before publication.
+
+- Validation issues should support at least warning, error, and blocking levels.
 
 - Widgets backed by local or external event pipelines should fail safely when their data scrapers, data retrievers, data sources, or data flow resources are unavailable or malformed.
 
@@ -476,20 +710,27 @@ The longer-term direction is to turn the project into a packaged single executab
 
 ### 5.5. Example Sankey-style admin UI sketch
 
-The following fake Mermaid example illustrates the intended shape of the data-flows admin UI, with scraper-created flows, retriever nodes, and widget-field dots fed by derived data sources.
+The following fake Mermaid example illustrates the intended shape of the Data Flow Admin UI, with scraper-created flows, retriever nodes, and widget-field dots fed by derived data sources.
 
 ```mermaid
-sankey-beta
-  Twitch Chat Scraper,Twitch Chat Source,12
-  YouTube Chat Scraper,YouTube Chat Source,12
-  Twitch Chat Source,Merged Chat Retriever,12
-  YouTube Chat Source,Merged Chat Retriever,12
-  Merged Chat Retriever,Merged Chat Source,24
-  Merged Chat Source,Chat Rail.message dot,14
-  Merged Chat Source,Chat Rail.badge dot,10
-  Twitch Chat Source,Viewer Count Retriever,12
-  Viewer Count Retriever,Viewer Count Source,12
-  Viewer Count Source,Stats Card.viewerCount dot,12
+---
+config:
+  sankey:
+    showValues: false
+    linkColor: source
+---
+sankey
+  Twitch Chat Scraper,Twitch Chat Source,1
+  YouTube Chat Scraper,YouTube Chat Source,1
+
+  Twitch Chat Source,Chat Data Retriever,1
+  YouTube Chat Source,Chat Data Retriever,1
+  Chat Data Retriever,Twitch Chat Source end,1
+  Chat Data Retriever,YouTube Chat Source end,1
+  Chat Data Retriever,Merged Chat Data Source,1
+  Merged Chat Data Source,Chat Data Flow Resource,1
+  Chat Data Flow Resource,Merged Chat Data Source end,1
+
 ```
 
 - Widget-instance stickers or cards below the diagram can keep data-flow-resource dots visually grouped by widget ownership and reduce placement ambiguity.
@@ -510,7 +751,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 ### 7.1. User-centric metrics
 
-- At least 90% of first-time operators can create or open an enhancement configuration and produce a first working preview within 5 minutes of launch.
+- At least 90% of first-time operators can create or open a NEXIS project and produce a first working preview within 5 minutes of launch.
 
 - At least 95% of accepted edits are reflected in the preview in under 1 second on target local hardware.
 
@@ -704,7 +945,13 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - **Acceptance criteria**:
 
-  - The local app exposes a browser-accessible admin route after startup.
+  - The local app exposes a browser-accessible admin route at `/admin` after startup.
+
+  - Navigating to `/` redirects to `/admin`.
+
+  - For first-time users, `/admin` resolves to `/admin/start`.
+
+  - For returning users, `/admin` resolves to the last Admin UI address that was stored when an event was appended to the history log.
 
   - The admin UI loads without requiring a hosted backend.
 
@@ -712,19 +959,21 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - The route works in both development and packaged runtime flows.
 
-### 10.2. Create or open an enhancement configuration
+  - The launch-time Admin UI subsection routes are reachable at `/admin/start`, `/admin/settings`, `/admin/plugins`, `/admin/permissions`, `/admin/overlay/edit/:overlayId`, `/admin/overlay`, `/admin/data`, `/admin/log`, and `/admin/arts`.
+
+### 10.2. Create or open a NEXIS project
 
 - **ID**: US-002
 
-- **Description**: As a streamer, I want to create or open an enhancement configuration so that I can work on a reusable stream setup instead of starting from scratch every time.
+- **Description**: As a streamer, I want to create or open a NEXIS project so that I can work on a reusable stream setup instead of starting from scratch every time.
 
 - **Acceptance criteria**:
 
-  - I can start from a new configuration, a starter preset, or a previously saved setup.
+  - I can start from a new project, a starter preset, or a previously saved project.
 
-  - The app clearly shows which configuration is currently being edited.
+  - The app clearly shows which NEXIS project is open and which enhancement configuration is currently being edited.
 
-  - Opening a configuration restores its editable state.
+  - Opening a project restores its editable state.
 
   - Resetting to a safe baseline is available when needed.
 
@@ -738,11 +987,19 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - I can create widget instances from widgets that are available in the admin interface.
 
+  - When I add a widget to an overlay, I can see the permissions that widget instance will request before I accept it.
+
+  - Those requested permissions are presented as core-defined commands with human-readable descriptions.
+
   - I can configure reusable widget settings separately from widget-instance-specific overlay settings.
+
+  - Widget-instance creation and the widget-instance configuration form are driven by the template provided by the source widget.
 
   - I can configure renderable widget instances and also keep non-renderable widgets available as reusable sources when they serve a supporting role.
 
   - I can edit the main settings for reusable widgets and widget instances without direct code changes.
+
+  - The widget-instance configuration form shows the current permissions for that instance so I can review and change them.
 
   - Invalid widget configurations are rejected or surfaced clearly.
 
@@ -778,9 +1035,21 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - The data source created by a scraper contains events from a single coherent event domain, such as chat-message events or follow-notification events.
 
+  - Each data scraper reports its own health using source-specific checks that matter for its concrete upstream input.
+
+  - If a scraper judges the health of its produced data source to be too poor for useful operation, that data source is treated as halted.
+
+  - A halted data source emits a health or halt event in its event stream so widgets can use it to surface understandable degraded behavior.
+
+  - If that data source becomes healthy enough again, it emits a recovery health event in that same event stream.
+
   - Data scrapers can expose fake-event generation so I can test data flows and widgets without waiting for real upstream events or consuming API credits.
 
   - Data retrievers can subscribe to one or more data sources in a non-destructive way, always depend on at least one upstream data source, and always produce exactly one new downstream data source.
+
+  - When a data retriever depends on an upstream data source that remains halted or unhealthy, that retriever's processing is halted until that upstream source emits a recovery health event.
+
+  - Upstream health, halt, and recovery events are propagated automatically through the downstream data source's event stream rather than by retriever-specific filtering or transformation logic.
 
   - I can enable or disable data scrapers from the visual flow editor.
 
@@ -864,13 +1133,13 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
 - **ID**: US-008
 
-- **Description**: As a render consumer, I want `/render/:OVERLAY_ID` to reflect the live approved state of a specific overlay, and `/staging/:OVERLAY_ID` to reflect its staged in-progress state, so that live output stays stable while validation remains separate.
+- **Description**: As a render consumer, I want `/render/:OVERLAY_ID` to reflect the live Render projection of a specific overlay, and `/staging/:OVERLAY_ID` to reflect its staged Preview projection, so that live output stays stable while validation remains separate.
 
 - **Acceptance criteria**:
 
-  - `/render/:OVERLAY_ID` renders the live projected state for that overlay instead of a placeholder page.
+  - `/render/:OVERLAY_ID` renders the live Render projection for that overlay instead of a placeholder page.
 
-  - `/staging/:OVERLAY_ID` renders the staged projected state for that overlay instead of sharing the live route output.
+  - `/staging/:OVERLAY_ID` renders the staged Preview projection for that overlay instead of sharing the live route output.
 
   - Render routes remain read-only from the perspective of editing workflows.
 
@@ -984,7 +1253,7 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - The UI can start an account-linking flow for a scraper that requires upstream authorization.
 
-  - The UI explains what account access and permissions are being requested before the user approves the link.
+  - The UI explains the granular account access and permissions being requested before the user approves the link.
 
   - OAuth2-style authorization is used when the upstream provider supports it.
 
@@ -1026,9 +1295,13 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - If local TLS assets are missing, the app offers to generate a self-signed local TLS certificate and matching key automatically by using whatever certificate-generation capability is available on the host platform.
 
+  - If the existing local TLS assets are expired, the app deletes them and regenerates a fresh self-signed local TLS certificate and matching key instead of renewing them in place.
+
   - Generated TLS assets are stored in the system folders used by the application.
 
   - The app warns clearly that any generated local TLS certificate is self-signed and suitable only for strictly local-machine use, not for serving the application on any network.
+
+  - The packaged runtime does not add separate operator-facing renewal or trust-management UX beyond that local HTTPS bootstrap flow.
 
   - The local UI is served over HTTPS once valid local TLS assets are available.
 
@@ -1045,6 +1318,8 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 - **Acceptance criteria**:
 
   - Widget capabilities that can alter overlay behavior are explicitly permission-gated.
+
+  - Those protected-command permissions are declared by the plugin author against core-defined commands and remain reviewable from the widget-instance configuration form.
 
   - Authorized widgets can request changes to the current overlay or the displayed overlay.
 
@@ -1096,15 +1371,21 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - The archive can include overlays plus design-oriented widget resources such as images, animated assets, and sounds.
 
+  - The archive includes a manifest with the usual archive metadata plus the selected widget resources tagged as `art`, with each selected resource exported through its own settings-export mechanism.
+
   - Importing an Art Direction shows which widgets and resource types it supports through its dependency information.
 
-  - When applying an Art Direction, I can choose which existing widget resources to override.
+  - When applying an Art Direction, a modal flow lists the impacted widgets and lets me choose with one checkbox per widget which ones receive the Art Direction settings.
 
   - Imported Art Direction resources remain available for compatible resource field types even when I skip a specific override.
 
   - If imported overlays would collide by name with existing overlays, the imported overlays receive a numeric suffix or increment an existing numeric suffix instead of overwriting the current ones implicitly.
 
   - Widget resource tags can identify which resources are eligible for Art Direction packaging or reapplication.
+
+  - If an Art Direction name would collide with the reserved `art` or `data` tags, the resulting provenance tag is turned into `[name] + Art Direction`.
+
+  - Art Directions do not introduce revision management by default.
 
 ### 10.20. Start from bundled recipes and guided onboarding
 
@@ -1116,7 +1397,9 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - The application ships with a default set of widgets and data scrapers for basic starter scenarios.
 
-  - The welcome page offers bundled recipes as well as a way to import a more advanced recipe file.
+  - The welcome page offers bundled recipes as well as a way to import a more advanced recipe archive.
+
+  - Advanced recipe imports use a recipe archive format centered on a main TypeScript recipe file that builds the next app state by issuing commands comparable to the ones the UI would trigger.
 
   - Recipes can provision overlays, widgets, data scrapers, data retrievers, and related shared-state configuration as a starting point.
 
@@ -1124,5 +1407,161 @@ A streamer wants to assemble an on-brand set of stream enhancements before going
 
   - If a recipe requires multiple data-scraper account links, the wizard can group those links into one checklist-style step when practical.
 
+  - Applying a recipe always creates new overlays, using the numeric-suffix naming rule when overlay names collide.
+
+  - Applying or re-applying a recipe overrides data scrapers, data retrievers, and widget configurations with the recipe-defined configuration.
+
+  - Re-applying a recipe after user customization restores the recipe-defined configuration as the sane default.
+
   - Beginner, intermediate, and advanced recipe examples can coexist, including multi-source and multi-overlay scenarios.
+
+### 10.21. Configure general application settings from the Admin UI
+
+- **ID**: US-021
+
+- **Description**: As an operator, I want to configure general application settings from the Admin UI so that I do not need to edit raw config files or environment variables for basic behavior.
+
+- **Acceptance criteria**:
+
+  - The Admin UI includes a General settings section.
+
+  - I can edit user-facing settings such as language, system-folder locations, and local server settings there.
+
+  - If I change a server-facing setting such as the local port, the application performs a controlled restart rather than requiring a manual relaunch.
+
+  - During that restart, the UI shows a blocking reconnecting modal until the app is available again.
+
+  - That reconnecting modal should include clear waiting feedback, such as animation, rather than looking frozen.
+
+  - After reconnecting, I am returned to the same application location I was using before the restart.
+
+  - Optional playful easter-egg interaction in that modal is acceptable only if it does not hide the reconnecting state and if the operator can exit it explicitly.
+
+### 10.22. Manage plugins from the Admin UI
+
+- **ID**: US-022
+
+- **Description**: As an operator, I want to inspect, install, update, and remove plugins from the Admin UI so that I can manage integrations without dropping into manual filesystem or command-line workflows.
+
+- **Acceptance criteria**:
+
+  - The Admin UI includes a Plugin management section.
+
+  - I can inspect the installed plugins and their version information.
+
+  - I can install a plugin from a local file or a URL.
+
+  - If a plugin requests command permissions on activation, a modal explains those permissions and lets me approve or cancel activation.
+
+  - If I cancel that permissions modal, the plugin is not activated and the permissions are not granted.
+
+  - I can update or remove an installed plugin from the UI.
+
+  - Plugin entries expose changelog information for their updates.
+
+  - Plugin entries expose their version lineage so users can understand which intermediate versions were skipped.
+
+  - Plugin-owned data can be migrated across skipped versions through pure, composable version-to-version migration functions.
+
+### 10.23. Edit an overlay in the Overlay Studio
+
+- **ID**: US-023
+
+- **Description**: As a streamer or designer, I want a WYSIWYG Overlay Studio so that I can create and edit overlays visually instead of configuring everything through abstract forms alone.
+
+- **Acceptance criteria**:
+
+  - The Admin UI includes an Overlay Studio section for editing a single overlay.
+
+  - The canonical route for editing a specific overlay is `/admin/overlay/edit/:overlayId`.
+
+  - I can drag a widget from the widget palette onto the overlay to create a widget instance.
+
+  - I can reposition widget instances directly on the overlay surface.
+
+  - I can use visible snapping hints to place widget instances against overlay snapping zones or nearby widget instances, and I can temporarily bypass snapping with a modifier such as `Shift`.
+
+  - I can edit widget-instance configuration, including position, through a modal form.
+
+  - I can open widget-editing forms from the palette to configure reusable widget resources.
+
+  - The overlay name is editable even after creation.
+
+  - A default overlay name is generated from the current date and time when I create an overlay without naming it.
+
+  - I can configure the overlay dimensions directly.
+
+  - The overlay orientation updates automatically to portrait when the validated dimensions are taller than wide.
+
+  - Widget-instance placement is stored as top-left offsets with supported units, and snapped placement remains stable when overlay dimensions change.
+
+  - I can reorder layers, lock layers, hide layers, and move widget instances between layers from the Overlay Studio.
+
+  - If I drag a widget instance above another widget instance in the overlay surface, the dragged instance is promoted to the upper layer, creating a new upper layer when needed.
+
+  - I can resize widget instances from corner handles, rotate them from a rotation handle, and reposition their center of rotation.
+
+  - Moving a widget instance changes its placement without altering its rotation, and its rotation center remains relative to the widget instance rather than to the overlay as a whole.
+
+  - The Overlay Studio can show EBU R 95 safe areas.
+
+  - The Overlay Studio can show temporary pixel alignment guides while I drag widget instances.
+
+  - Saved, staged, and live state are visible through a simple publication-state indicator, such as a three-light bar.
+
+### 10.24. Manage overlays outside the studio
+
+- **ID**: US-024
+
+- **Description**: As a streamer, I want an Overlay Manager so that I can browse, inspect, open for editing, publish, or delete overlays without losing track of their current state.
+
+- **Acceptance criteria**:
+
+  - The Admin UI includes an Overlay Manager section with a list or table of overlays.
+
+  - I can create a new overlay from that section and then continue in the Overlay Studio.
+
+  - I can open an existing overlay from that section for editing in the Overlay Studio.
+
+  - I can inspect an overlay's lower-level details, including its widget instances and the data sources that supply it.
+
+  - I can delete an overlay only through an explicit confirmation flow.
+
+  - I can change an overlay's publication state through an explicit confirmation flow and see the current state clearly in the manager.
+
+### 10.25. Manage loaded Art Directions from the Admin UI
+
+- **ID**: US-025
+
+- **Description**: As a streamer or designer, I want an Art Direction Manager so that I can inspect, reapply, and delete loaded Art Directions from one place.
+
+- **Acceptance criteria**:
+
+  - The Admin UI includes an Art Direction Manager section.
+
+  - I can see the list of currently loaded Art Directions.
+
+  - I can inspect the resources contained by an Art Direction.
+
+  - I can reapply an Art Direction through a modal flow that lists the impacted widgets and lets me choose with one checkbox per widget which ones receive the Art Direction settings.
+
+  - I can delete an Art Direction only through an explicit confirmation flow.
+
+### 10.26. Manage permissions from the Admin UI
+
+- **ID**: US-026
+
+- **Description**: As an operator, I want a Permissions Manager so that I can inspect and change which core-defined commands each permission-bearing element is allowed to call.
+
+- **Acceptance criteria**:
+
+  - The Admin UI includes a Permissions Manager section.
+
+  - The Permissions Manager displays commands on one axis and permission-bearing elements on the other axis.
+
+  - Each intersection displays the current permission state for that element-command pair.
+
+  - I can grant or revoke a permission for an element-command pair through a checkbox at that intersection.
+
+  - Commands that alter application state are shown with human-readable and understandable descriptions.
 

@@ -5,7 +5,7 @@ This file tracks the current domain vocabulary for NEXIS and the small set of ar
 It distinguishes between:
 
 - concepts that are already defined well enough to act as the current shared language
-- concepts that exist but still need sharper boundaries
+- concept areas that still need sharper boundaries or structural cleanup even when some individual entries inside them are already defined
 - concepts that are likely missing and should be defined before the model grows much further
 
 ## Browse by section
@@ -17,8 +17,65 @@ It distinguishes between:
 - [Recommended first-pass model tree](#recommended-first-pass-model-tree)
 - [Domain map](#domain-map)
 
+## Browse by level definition
+
+Maintenance instruction:
+- Whenever a glossary term status changes, update this Browse by level definition section in the same edit.
+
+### Defined:
+  - [NEXIS project](#nexis-project)
+  - [Overlay](#overlay)
+  - [Widget](#widget)
+  - [Widget resource](#widget-resource)
+  - [Art Direction](#art-direction)
+  - [Widget resource tag](#widget-resource-tag)
+  - [Recipe](#recipe)
+  - [Data scraper](#data-scraper)
+  - [Data retriever](#data-retriever)
+  - [Data source](#data-source)
+  - [Data flow resource](#data-flow-resource)
+  - [Widget instance](#widget-instance)
+  - [Template](#template)
+  - [Enhancement configuration](#enhancement-configuration)
+  - [Preview projection](#preview-projection)
+  - [Render projection](#render-projection)
+  - [Admin UI](#admin-ui)
+  - [Binding](#binding)
+  - [Overlay placement](#overlay-placement)
+  - [Layer](#layer)
+  - [Transform](#transform)
+  - [Validation issue](#validation-issue)
+  - [Serialized format version](#serialized-format-version)
+  - [Local TLS asset](#local-tls-asset)
+  - [Permission](#permission)
+  - [Overlay dependency](#overlay-dependency)
+  - [Hexagonal architecture](#hexagonal-architecture)
+  - [Shared external platform plugin contract](#shared-external-platform-plugin-contract)
+  - [Port](#port)
+  - [Normalized capability event envelope](#normalized-capability-event-envelope)
+  - [Normalized actor account reference](#normalized-actor-account-reference)
+  - [Canonical actor identity reference](#canonical-actor-identity-reference)
+  - [Normalized chat source context](#normalized-chat-source-context)
+  - [Chat events capability port](#chat-events-capability-port)
+  - [Subscription events capability port](#subscription-events-capability-port)
+  - [Payment events capability port](#payment-events-capability-port)
+  - [Social activity events capability port](#social-activity-events-capability-port)
+  - [Adapter](#adapter)
+
+### Underdefined:
+  - [Pipeline archive manifest](#pipeline-archive-manifest)
+  - [History, audit, and undo](#history-audit-and-undo)
+  - [Overlay revision and publication state](#overlay-revision-and-publication-state)
+  - [Credential or auth grant](#credential-or-auth-grant)
+
+### Missing:
+  - [Trigger or automation rule](#trigger-or-automation-rule)
+  - [Capability policy](#capability-policy)
+  - [Render consumer or subscription](#render-consumer-or-subscription)
+
 ## Browse by concept
 
+- [NEXIS project](#nexis-project)
 - [Overlay](#overlay)
 - [Widget](#widget)
 - [Widget resource](#widget-resource)
@@ -44,31 +101,42 @@ It distinguishes between:
 - [Social activity events capability port](#social-activity-events-capability-port)
 - [Adapter](#adapter)
 - [Template](#template)
-- [Viewport placement](#viewport-placement)
+- [Overlay placement](#overlay-placement)
 - [Permission](#permission)
 - [Enhancement configuration](#enhancement-configuration)
 - [Preview projection](#preview-projection)
 - [Render projection](#render-projection)
 - [Admin UI](#admin-ui)
 - [History, audit, and undo](#history-audit-and-undo)
-- [Render mode](#render-mode)
-- [Project or workspace](#project-or-workspace)
 - [Overlay revision and publication state](#overlay-revision-and-publication-state)
 - [Layer](#layer)
 - [Binding](#binding)
 - [Pipeline archive manifest](#pipeline-archive-manifest)
 - [Serialized format version](#serialized-format-version)
 - [Transform](#transform)
+- [Validation issue](#validation-issue)
 - [Credential or auth grant](#credential-or-auth-grant)
 - [Local TLS asset](#local-tls-asset)
-- [Validation issue](#validation-issue)
 - [Trigger or automation rule](#trigger-or-automation-rule)
 - [Capability policy](#capability-policy)
 - [Render consumer or subscription](#render-consumer-or-subscription)
 - [Theme profile](#theme-profile)
-- [Scene or composition target](#scene-or-composition-target)
 
 ## Core concepts
+
+### NEXIS project
+
+Status: defined
+
+Current definition:
+- A NEXIS project is the main aggregate root for all user-managed configuration.
+- It owns the current enhancement configuration together with the user-managed assets and records around it, such as reusable widgets, overlays, Art Directions, recipes, and credentials or auth grants.
+- It is the top-level thing the application creates, opens, duplicates, resets, saves, or persists for a user.
+
+Clarification:
+- Enhancement configuration is the operator-facing editable setup inside a NEXIS project rather than the broader root aggregate itself.
+
+[Back to top](#nexis-domain-glossary)
 
 ### Overlay
 
@@ -76,6 +144,7 @@ Status: defined
 
 Current definition:
 - A configuration of widget instances composed on top of a video stream.
+- The overlay is the stream-facing composition target for those widget instances, so the current domain model does not need a separate Scene-style target concept.
 - The overlay stores widget-instance-specific configuration and an overlay dependency list for the widgets used to create those instances.
 
 Why it is strong:
@@ -99,6 +168,9 @@ Current definition:
 - A widget proposes to the person creating or modifying an overlay a reusable way to access visual elements or data inside that overlay.
 - A widget is the source object from which widget instances are created.
 - A widget is importable and exportable outside a specific overlay.
+
+Current role:
+- A widget provides the widget-owned template used to create and configure its widget instances.
 
 Current capabilities:
 - It can hold one or multiple widget resources.
@@ -139,7 +211,7 @@ Export behavior:
 
 ### Art Direction
 
-Status: underdefined
+Status: defined
 
 Current definition:
 - An Art Direction is a reusable package of overlays plus design-oriented widget resources, such as images, animated assets, and sounds, that can be imported, exported, and reapplied as one archive.
@@ -150,30 +222,26 @@ Behavior expectations:
 - Importing or applying an Art Direction should allow the user to choose which current widget resources to override.
 - Even when a user skips a specific override, imported Art Direction resources should remain available for compatible resource field types covered by that Art Direction.
 - If imported overlays would collide by name with existing overlays, the imported overlays should receive a numeric suffix or increment an existing numeric suffix rather than overwriting the current overlays implicitly.
-
-What still needs definition:
-- The exact archive shape for Art Direction imports and exports.
-- Whether Art Directions package reusable starting overlays, exact overlay revisions, or both.
-- How re-applying an Art Direction should behave after local widget resources have been modified.
+- Art Direction import and export should use an archive containing a manifest with the usual archive metadata plus the selected widget resources tagged as `art`, with each selected resource exported through its own settings-export mechanism.
+- Art Directions should not introduce revision management by default.
+- Re-applying an Art Direction should open a modal flow that lists the impacted widgets and presents a checkbox for each one so the user can choose which widgets receive the Art Direction settings.
 
 [Back to top](#nexis-domain-glossary)
 
 ### Widget resource tag
 
-Status: underdefined
+Status: defined
 
 Current definition:
-- A widget resource tag is a plugin-authored classification attached to a widget resource to describe what kinds of workflows that resource can participate in.
-- Tags such as `art` and `data` can indicate whether a resource can be packaged inside an Art Direction, linked to a data source, or both.
+- A widget resource tag is a core-standardized classification attached to a widget resource to describe what kinds of workflows that resource can participate in.
+- The only allowed tag kinds are `art`, `data`, and an Art Direction provenance tag derived from the Art Direction name.
+- Widget resources may carry only those core-standardized tag kinds rather than arbitrary new tag names.
 - Tags should not be arbitrarily edited by end users, because they describe the resource contract rather than a user preference.
 
 Behavior expectations:
 - Widget resource tags should help the UI decide which resources are eligible for Art Direction packaging or data-flow configuration.
-- Applying an Art Direction may also associate provenance-oriented markers, such as the Art Direction identity itself, so the UI can show which resources currently come from that Art Direction.
-
-What still needs definition:
-- Which tags should be standardized across the core versus left entirely to plugins.
-- Whether provenance-style Art Direction markers should be modeled as tags or as adjacent metadata.
+- Applying an Art Direction should associate a provenance tag based on the Art Direction name so the UI can show which resources currently come from that Art Direction.
+- If an Art Direction is named `art` or `data`, its provenance tag should be turned into `[name] + Art Direction` so it does not collide with the reserved workflow tags.
 
 [Back to top](#nexis-domain-glossary)
 
@@ -186,6 +254,13 @@ Current definition:
 
 Output rule:
 - That single-domain data source should contain events from a single coherent event domain.
+
+Health expectations:
+- A data scraper should report its own health using source-specific checks that matter for its concrete upstream input.
+- A scraper connected to a remote API may report connection stability or request viability, while a scraper reading a file may report whether that file remains readable.
+- A data scraper should also judge whether the health of the data source it produces is still good enough to be useful.
+- If that health becomes too poor, the data source produced by the scraper should be considered halted.
+- If that data source later becomes healthy enough again, the scraper should emit a recovery health event in that same event stream.
 
 Examples:
 - A Twitch chat scraper creates one data source containing Twitch chat-message events.
@@ -215,6 +290,13 @@ Current definition:
 - It filters, transforms, aggregates, or selects the events it receives.
 - It produces a new data source from the resulting derived event stream.
 
+Health behavior:
+- Upstream health and halt propagation downstream should be automatic pipeline behavior rather than retriever-specific filtering or transformation logic.
+- When a data retriever depends on one or more upstream data sources and any one of them remains halted or unhealthy, the retriever process should itself be halted.
+- While halted for upstream health reasons, the retriever should stop processing its ordinary targeted events instead of continuing to process the other upstream sources it depends on.
+- When an upstream halted or unhealthy data source emits a recovery health event, the retriever may resume processing.
+- Health, halt, and recovery events from upstream data sources should be propagated automatically into the event stream of the downstream data source the retriever produces.
+
 Mental model:
 - If data sources are flows, data retrievers are selective strips across one or more upstream flows that produce a new downstream flow without reducing the original flows.
 
@@ -230,6 +312,13 @@ Current definition:
 
 Domain rule:
 - A data source should represent a single coherent event domain, even when that domain is derived from one or more upstream data sources.
+
+Health behavior:
+- A data source created by a data scraper may be considered halted when that scraper reports health too poor for the source to remain useful.
+- A data source has one event stream rather than a separate health-status channel beside its ordinary events.
+- Health, halt, and recovery events belong to that same event stream.
+- When a data source is halted for health reasons, a health or halt event should be emitted in that event stream so widgets can surface understandable degraded behavior.
+- When a halted or unhealthy data source becomes healthy enough again, it should emit a recovery health event in that same event stream.
 
 Why it is strong:
 - It is no longer overloaded with the meaning of raw external origin.
@@ -264,7 +353,7 @@ Current definition:
 
 Typical instance-specific configuration:
 - Opacity
-- Viewport placement
+- Overlay placement
 - Layering or other overlay-scoped visual settings
 - Instance-specific behavior rules such as filters or event-selection logic
 
@@ -291,22 +380,24 @@ Operational expectations:
 
 ### Recipe
 
-Status: underdefined
+Status: defined
 
 Current definition:
 - A recipe is a reusable application-configuration starter that orchestrates one or more overlays, widgets, data scrapers, data retrievers, and related configuration through the app-level shared state.
 - It exists to improve onboarding by giving new users guided starting points instead of forcing them to configure the application from scratch.
-- A recipe may be bundled with the app for common starter scenarios or imported from an external file for more advanced setups.
+- A recipe may be bundled with the app for common starter scenarios or imported from an external recipe archive for more advanced setups.
+
+Format expectations:
+- Recipe imports and exports should use an archive-based format so one recipe can carry its configuration and related resources as a single file.
+- That archive should center on a main TypeScript recipe file that builds the next app state by issuing commands comparable to the ones the UI would trigger.
 
 Behavior expectations:
-- The welcome page should be able to present beginner-friendly bundled recipes as well as import paths for more advanced recipe files.
+- The welcome page should be able to present beginner-friendly bundled recipes as well as import paths for more advanced recipe archives.
 - Loading a recipe should run a guided recipe wizard that prompts for any required data-scraper configuration and account linking before the recipe is considered ready.
 - When possible, account linking inside that wizard should be grouped into a single checklist-style step.
-
-What still needs definition:
-- The exact recipe file format and whether it is archive-based or purely configuration-based.
-- Which parts of recipe application are idempotent, mergeable, or always create new overlays and widgets.
-- How recipe re-application should behave after the user customizes the generated configuration.
+- Applying a recipe should always create new overlays, using the existing numeric-suffix naming rule when overlay names collide.
+- Applying or re-applying a recipe should override data scrapers, data retrievers, and widget configurations with the recipe-defined configuration rather than trying to merge user customizations.
+- Re-applying a recipe after customization should treat the recipe as a sane default and restore the recipe-defined configuration over those customizations.
 
 [Back to top](#nexis-domain-glossary)
 
@@ -588,125 +679,155 @@ Port guidance:
 
 ## Underdefined concepts
 
+This section also holds nearby concepts whose surrounding model is still settling, even when an individual term inside the section has already been clarified enough to count as defined.
+
 ### Template
 
-Status: underdefined
+Status: defined
 
 Current definition:
-- The rendering or behavior definition provided by a widget and consumed by its instances.
+- A template is the widget-provided blueprint that defines what a widget contributes when creating its widget instances.
+- It defines the render or behavior structure a widget instance uses.
+- It also defines the instance-side configuration shape and form used when configuring those widget instances.
 
-What still needs definition:
-- Whether it is visual-only, behavioral, or both.
-- Whether templates are reusable assets, embedded config, or code-level render strategies.
+Current behavior:
+- A widget should provide its template as part of the widget definition.
+- Widget instances should be created from the template provided by their source widget.
+- The widget-instance configuration UI should be derived from the template-defined instance configuration form.
+- For now, a template should be treated as widget-owned rather than as a standalone reusable artifact separate from the widget.
 
 [Back to top](#nexis-domain-glossary)
 
-### Viewport placement
+### Overlay placement
 
-Status: underdefined
+Status: defined
 
 Current definition:
-- The placement rules that determine where a widget appears on the output viewport.
+- The placement rules that determine where a widget instance appears inside an overlay.
 
-What still needs definition:
-- Anchor semantics
-- Units and coordinates
-- Width and height rules
-- Overflow and collision handling
-- Responsive behavior
-- Layer ordering
+Current behavior:
+- An overlay should expose nine primary snapping zones: top-left, top-center, top-right, middle-left, middle-center, middle-right, bottom-left, bottom-center, and bottom-right.
+- Snapping targets should be visually hinted while the user drags a widget instance.
+- Snapping should apply both to overlay zones and to nearby widget instances.
+- Users should be able to temporarily bypass snapping while dragging, such as by holding a modifier key like Shift.
+- Free placement remains allowed, but when a widget instance is close enough to a snapping target it should snap to the closest one.
+- The snapping distance should be configurable in General settings in pixel values.
+- Widget instances should store placement as number-plus-unit offsets from the top-left corner, with pixels and percentages supported and percentages used by default.
+- When a widget instance is snapped to a remembered zone, the overlay should preserve that snapped zone so placement remains semantically stable when overlay dimensions change.
 
 [Back to top](#nexis-domain-glossary)
 
 ### Permission
 
-Status: underdefined
+Status: defined
 
 Current definition:
-- An explicit capability granted to a widget.
+- A permission is an explicit authorization for a concrete plugin-provided element to call a specific core-defined command.
 
-What still needs definition:
-- Who grants it
-- What resource it targets
-- What action it authorizes
-- Whether it is per widget, per overlay, or policy-based
+Behavior expectations:
+- Permissions should be as granular as possible so users can grant only the specific command authorizations an element actually needs.
+- For now, only the core should define the commands that permissions can authorize.
+- Plugin authors should declare which core-defined commands their widgets, data scrapers, or other plugin-provided elements request.
+- Commands that alter application state should provide a human-readable and understandable description so permission UIs can explain them clearly.
+- Permission requests should be shown to the user when they add a widget to an overlay, activate a plugin, or otherwise activate a permission-bearing element.
+- Widget-instance configuration, scraper configuration, or another element-specific configuration flow should display the current permissions for that element so the user can review and change them.
+- Activating a plugin should open a modal that lists the permissions the plugin requires, explains what they do, and lets the user approve or cancel activation.
+- If the user cancels that activation-permission modal, the plugin should remain inactive and no permissions should be granted.
+- A published-overlay widget instance may require explicit permission before it can trigger protected commands such as changing which overlay is displayed.
 
 [Back to top](#nexis-domain-glossary)
 
 ### Enhancement configuration
 
-Status: underdefined
+Status: defined
 
 Current definition:
-- The editable stream-enhancement setup described throughout the PRD.
+- An enhancement configuration is the editable setup spanning one or more overlays together with all widget instances those overlays contain.
+- It also includes the data sources those widget instances need through their data flow resources, and therefore the data scrapers and data retrievers required to provide those data sources.
 
-What still needs definition:
-- Whether it is identical to an overlay or a larger root object containing overlays, widgets, data scrapers, data retrievers, data sources, data flow resources, permissions, and publication state.
-
-Why this matters:
-- This is currently the largest structural ambiguity in the vocabulary.
+Clarification:
+- Enhancement configuration is an operator-facing synonym for that editable multi-overlay setup inside a NEXIS project rather than for the NEXIS project itself or for a single overlay.
 
 [Back to top](#nexis-domain-glossary)
 
 ### Preview projection
 
-Status: underdefined
+Status: defined
 
 Current definition:
-- The preview-facing representation used while editing or validating output.
+- A preview projection is the staged overlay output served for validation through the overlay-specific staging route.
 
-What still needs definition:
-- Whether it reflects draft state, published state, or a selectable revision.
-- Whether preview is a domain projection or just a presentation concern.
+Current behavior:
+- A preview projection should reflect the staged revision of a specific overlay rather than the live published revision.
+- It should be exposed at `/staging/:OVERLAY_ID`.
+- It should render the overlay without the Admin UI around it, like the render route does, so operators can validate the staged output directly.
 
 [Back to top](#nexis-domain-glossary)
 
 ### Render projection
 
-Status: underdefined
+Status: defined
 
 Current definition:
-- The read-only render-facing representation consumed by streaming software.
+- A render projection is the finalized published overlay output served through the overlay-specific render route.
 
-What still needs definition:
-- Whether render always follows the active published revision.
-- Whether render mode is part of the domain or only transport and route configuration.
+Current behavior:
+- A render projection should reflect the live published revision of a specific overlay.
+- It should be exposed at `/render/:OVERLAY_ID`.
+- It should remain read-only from the perspective of editing workflows and should not include the Admin UI.
 
 [Back to top](#nexis-domain-glossary)
 
 ### Admin UI
 
-Status: underdefined
+Status: defined
 
 Current definition:
-- The operator-facing editing UI.
+- The operator-facing configuration-management workspace.
+- It is more than a UI boundary and represents the explicit domain context where operators manage enhancement configurations, plugins, overlays, Art Directions, recipes, permissions, and history.
+- At launch it should be split into major sections for the Welcome page, General settings, Plugin management, Permissions Manager, Overlay Studio, Overlay Manager, Data Flow Admin UI, History log, and Art Direction Manager.
+- The Welcome page should be the first destination on first launch.
+- The canonical admin entrypoint should be `/admin`, while `/` should redirect to `/admin` rather than acting as the long-term operator route itself.
+- At launch, the Admin UI subsection routes should follow `/admin/start`, `/admin/settings`, `/admin/plugins`, `/admin/permissions`, `/admin/overlay/edit/:overlayId`, `/admin/overlay`, `/admin/data`, `/admin/log`, and `/admin/arts`.
+- First-time users should be sent from `/admin` to `/admin/start`, while returning users should be sent to the last Admin UI address that was stored when an event was appended to the history log.
+- The current product direction assumes one effective local operator profile on one machine rather than active multi-user account management.
 - Diagram-addressable elements such as data scrapers, data sources, data retrievers, data flow resources, widgets, and widget instances should use stable persisted identifiers and faithful names rather than synthetic helper labels.
+- The exact navigation form, such as tabs, menus, or another section switcher, may evolve later, but the initial information architecture should clearly separate those major operator tasks.
+- Later versions may allow users to reorder section navigation, but the Welcome page should remain pinned as the first section.
 - It may include a dedicated pipeline editor for visualizing and configuring data pipelines, such as a dynamic Sankey or alluvial diagram where data scrapers are the origins of flows, data retrievers are nodes that sit on one or more upstream flows, and widget-field dots represent data flow resources attached to widget instances.
 - For event-driven widget hydration, that pipeline editor can act as the primary configuration UI even though the visible diagram is derived from persisted element configuration on data scrapers, data retrievers, data flow resources, widgets, and widget instances rather than stored as a separate shared configuration artifact.
 - Retriever nodes should be positioned dynamically from the data sources they depend on and the next downstream dependency or end of the diagram, with their default placement calculated at the midpoint between those dependency boundaries rather than persisting node positions on the retrievers themselves.
 - That pipeline editor can support enabling or disabling scrapers and retrievers, greying out disabled flows and affected nodes, routing flows into retriever nodes, configuring retrievers through node-driven modal dialogs, placing widget-field dots directly on the relevant flows so the represented data flow resources update their own binding identifiers, surfacing downstream warning indicators on affected widget-field dots when disabled upstream flows break those bindings, showing widget-instance stickers or cards below the diagram with one dot per data flow resource field, and importing or exporting individual retriever configurations or whole-diagram pipeline configurations.
-- Limited visual preferences such as stable accessible color assignments or constrained layout nudges may persist locally per user without becoming part of the shared domain configuration.
-
-What still needs definition:
-- Whether this is only a UI boundary or whether it implies an explicit domain context such as draft editing or configuration management.
-- How far pipeline visualization should go beyond inspection into direct manipulation and configuration.
-- Which local-only layout preferences are worth persisting per user and which should always be recalculated.
+- That pipeline editor should go beyond inspection into direct manipulation and configuration, including creating new data retrievers and assigning data flow resources by drag and drop from a palette of widgets that expose data flow resources.
+- The General settings area should cover user-facing app settings such as language, system folders, and local server behavior.
+- Changing server-facing settings such as the port should be able to trigger a controlled server restart with blocking feedback, and the operator should be returned to the same application location after reconnecting.
+- That restart feedback may include animation and optional playful easter-egg interaction, but it should not hide the fact that the application is waiting for the new address to become available and should remain explicitly exitable.
+- The Plugin management area should let users inspect installed plugins, install from a local file or URL, update or remove plugins, and review plugin version, changelog, and version-lineage information.
+- Activating a plugin should require an explicit permission-approval modal when that plugin requests command permissions.
+- Plugin migration between versions should remain pure and composable so skipped versions can be traversed safely.
+- The Permissions Manager should let users inspect and change command permissions through a matrix view with commands as columns, permission-bearing elements as rows, and a checkbox at each intersection that shows and controls the current authorization state.
+- The Overlay Studio should act as the WYSIWYG editing surface for a single overlay, with a widget palette, drag-and-drop widget-instance creation, direct placement and manipulation, modal editing for widget and widget-instance configuration, editable overlay naming, and visible saved-staged-live status.
+- The Overlay Manager should list overlays and let users create, inspect, edit, delete, or change publication state with explicit confirmations where the action is risky.
+- The History log should foreground the risk of restoring past state instead of presenting it like a harmless navigation history.
+- The Art Direction Manager should let users inspect contained resources, reapply Art Directions through the impacted-widget checkbox modal, or delete loaded Art Directions.
+- By default, preferences that affect application state or configuration should be persisted, while preferences that affect only the Admin UI layout should default to browser-local storage unless specified otherwise.
 
 [Back to top](#nexis-domain-glossary)
 
 ### Binding
 
-Status: underdefined
+Status: defined
 
 Current definition:
-- A binding is element-owned derived configuration that connects a widget field or widget input to a data flow resource and, through it, to one or more data sources.
-- Retriever configurations should persist their own upstream-data-source binding identifiers, and data flow resource configurations should persist their own ingested-data-source binding identifiers, rather than storing separate diagram-only connection objects.
-- In the admin pipeline editor, bindings are manipulated by placing widget-field dots directly on the relevant flows so the represented data flow resource updates its own binding identifier and ingests events from the flow it is placed on.
+- A binding means that a widget field listens to a specific data flow resource or source.
+- In the admin pipeline editor, bindings are manipulated by placing widget-field dots directly on the relevant flows so the represented data flow resource updates its own binding identifier and ingests events from the selected flow.
+- Binding identifiers should persist on the owning data flow resources rather than as separate diagram-only connection objects.
 - Importing or exporting whole-diagram pipeline configurations should use a zip archive that bundles each participating element's own serialized import or export format together with a lightweight manifest, rather than inventing a separate whole-diagram binding schema.
 
-What still needs definition:
-- Whether any non-data-flow-resource widget inputs should ever participate in the pipeline editor.
-- How manual inputs, fallback values, and degraded states participate in a binding.
+Current first-pass scope:
+- For now, only widget fields backed by data flow resources should participate in the pipeline editor.
+- Other widget inputs or future non-data-flow-resource widget resource types may be added later, but they are outside the first-pass binding workflow.
+- Manual inputs, fallback values, and degraded behavior are outside the meaning of binding.
 
 [Back to top](#nexis-domain-glossary)
 
@@ -729,15 +850,14 @@ What still needs definition:
 
 ### Serialized format version
 
-Status: underdefined
+Status: defined
 
 Current definition:
 - A serialized format version is the version string carried by an importable or exportable artifact to describe the structure of its serialized data independently from the app version.
 - Widgets, data scrapers, data retrievers, data flow resources, plugin-provided artifacts, and future importable or exportable artifact kinds should each expose their own serialized format version string when they support save or restore or import or export.
 - Importers should treat that value as an opaque compatibility label rather than assuming semantic versioning or monotonic ordering, and migration strategy remains the responsibility of the artifact or plugin author rather than the NEXIS core.
-
-What still needs definition:
-- How core import UIs should report unsupported serialized format version strings to operators when an artifact loader or plugin rejects them.
+- When an artifact loader or plugin rejects an unsupported serialized format version string, the import UI should surface that mismatch as a version-mismatch form error.
+- The UI may also supplement that required form error with a toast or browser notification when appropriate.
 
 [Back to top](#nexis-domain-glossary)
 
@@ -754,25 +874,13 @@ What still needs definition:
 
 [Back to top](#nexis-domain-glossary)
 
-### Render mode
-
-Status: underdefined
-
-Current definition:
-- A possible secondary render-detail concept, but no longer the primary route identifier now that overlay-specific `/render/:OVERLAY_ID` and `/staging/:OVERLAY_ID` routes are preferred.
-
-What still needs definition:
-- Whether it should survive as a first-class domain concept at all or remain only an optional implementation detail beneath overlay-specific routes.
-
-[Back to top](#nexis-domain-glossary)
-
 ### Overlay revision and publication state
 
 Status: underdefined
 
 Current definition:
 - Overlay revision and publication state distinguishes an overlay's in-progress, staged, and live states.
-- In the current direction, `/staging/:OVERLAY_ID` exposes the staged revision for validation, while `/render/:OVERLAY_ID` exposes the live revision intended for actual use.
+- In the current direction, `/staging/:OVERLAY_ID` exposes the staged Preview projection for validation, while `/render/:OVERLAY_ID` exposes the live Render projection intended for actual use.
 
 What still needs definition:
 - Whether staged and live should remain the only publication-facing states or whether other explicit states such as archived or scheduled publication should exist later.
@@ -797,57 +905,74 @@ What still needs definition:
 
 ### Local TLS asset
 
-Status: underdefined
+Status: defined
 
 Current definition:
-- A local TLS asset is the locally scoped HTTPS key-and-certificate material the packaged runtime uses to serve the local UI over HTTPS on the same machine.
+- A local TLS asset is only the locally scoped private key and certificate pair the packaged runtime uses to serve the local UI over HTTPS on the same machine.
 - The runtime should discover existing local TLS assets in the system folders it uses before offering to generate new ones.
 - When generated automatically, those assets should stay in the system folders used by the application and should be treated as strictly local-machine assets rather than network-facing certificates.
-
-What still needs definition:
-- Whether the term should cover only the private key and certificate pair or also adjacent metadata such as expiry, fingerprint, and generation provenance.
-- How rotation, renewal, replacement, or trust guidance should be surfaced in operator-facing UX.
+- The term should cover only the private key and certificate pair, not adjacent metadata such as expiry, fingerprint, or generation provenance.
+- The application should not add separate operator-facing rotation, renewal, replacement, or trust-management UX for that pair.
+- If the existing local TLS assets are expired, they should be deleted and regenerated instead of being renewed in place.
+- No separate user-facing renewal or trust workflow is required beyond the existing local HTTPS bootstrap flow.
 
 [Back to top](#nexis-domain-glossary)
 
 ## Missing concepts
 
-### Project or workspace
-
-Status: missing
-
-Why it is needed:
-- The model likely needs a root object above overlays, widgets, data scrapers, data retrievers, data sources, data flow resources, credentials, and publication state.
-
-Candidate role:
-- Main aggregate root for all user-managed configuration.
-
-[Back to top](#nexis-domain-glossary)
-
 ### Layer
 
-Status: missing
+Status: defined
 
-Why it is needed:
-- Placement alone is not enough for compositing; overlays also need ordering.
+Current definition:
+- A layer is the ordered compositing level that determines how widget instances stack inside an overlay.
+- Higher layer numbers render above lower layer numbers.
+
+Current behavior:
+- Layer numbering starts at `0`, and higher layers increment upward from there.
+- The Overlay Studio should expose a layer list so operators can reorder layers by drag and drop.
+- The layer list should show a drop highlight indicating where the grabbed layer would land if released.
+- A layer can be locked to prevent modification to the widget instances it contains.
+- A layer can be hidden so its widget instances are not displayed in the overlay editing view.
+- Operators should be able to change a widget instance layer by dragging it to another layer in the list, by editing its layer number in configuration, or by using shortcuts such as `Alt+PageUp` and `Alt+PageDown`.
+- If a widget instance is dragged above another widget instance in the overlay surface, it should be promoted to the upper layer; if no higher layer exists yet, a new one should be created.
 
 [Back to top](#nexis-domain-glossary)
 
 ### Transform
 
-Status: missing
+Status: defined
 
-Why it is needed:
-- The system expects derived values, formatting, merging, filtering, and computation before rendering.
+Current definition:
+- A transform is the widget-instance-specific geometry state that controls resizing and rotation around a rotation center.
+
+Current behavior:
+- Resizing and rotation are part of transform, while ordinary dragging changes overlay placement without altering the current rotation.
+- The rotation center defaults to the center of the widget instance.
+- The rotation center can be repositioned by the user and remains relative to the widget instance position rather than to the overlay as a whole.
+- Rotating a widget instance around a moved rotation center can change both its final rotation and its final displayed position.
+- The Overlay Studio should expose square resize handles, a rotation handle, and a dedicated rotation-center handle for transform editing.
 
 [Back to top](#nexis-domain-glossary)
 
 ### Validation issue
 
-Status: missing
+Status: defined
 
-Why it is needed:
-- Invalid configurations and degraded states are already part of the product expectations, but there is no explicit domain concept for warnings, errors, or blocking issues.
+Current definition:
+- A validation issue is an explicit warning, error, or blocking issue attached to a user-managed element, field, or workflow state when the application detects invalid configuration, degraded behavior, or another condition the operator should understand.
+
+Current levels:
+- Warning: something is degraded, risky, or incomplete but not blocked.
+- Error: something is invalid or failing and requires operator attention.
+- Blocking: something prevents the current action or workflow from proceeding.
+
+Display expectations:
+- Validation issues should be displayed with a clear explanation of what they are and why they matter.
+- When possible, a validation issue may include a direct fix action.
+- Validation issues tied to form fields should be shown near the relevant field.
+- Validation issues tied to data-flow state should be shown in the data-flow UI, such as the Sankey or alluvial pipeline interface.
+- Toast or browser-notification feedback may supplement that in-context issue display when appropriate, but it should not replace the primary in-context presentation.
 
 [Back to top](#nexis-domain-glossary)
 
@@ -865,7 +990,7 @@ Why it is needed:
 Status: missing
 
 Why it is needed:
-- Per-widget permission alone may not be enough. A higher-level policy model can describe what categories of behavior are ever allowed.
+- Per-element permission alone may not be enough. A higher-level policy model can describe what categories of behavior are ever allowed.
 
 [Back to top](#nexis-domain-glossary)
 
@@ -878,27 +1003,9 @@ Why it is needed:
 
 [Back to top](#nexis-domain-glossary)
 
-### Theme profile
-
-Status: missing
-
-Why it is needed:
-- Theme and presentation configuration may remain purely presentational, but if users manage it as data then it becomes part of the domain model.
-
-[Back to top](#nexis-domain-glossary)
-
-### Scene or composition target
-
-Status: missing
-
-Why it is needed:
-- This is optional, but it may become a useful term if the product aligns more directly with streamer mental models and scene-specific output targets.
-
-[Back to top](#nexis-domain-glossary)
-
 ## Recommended first-pass model tree
 
-1. Project or workspace
+1. NEXIS project
 2. Overlay
 3. Overlay dependency
 4. Overlay revision and publication state
@@ -913,16 +1020,17 @@ Why it is needed:
 13. Data flow resource
 14. Widget instance
 15. Template
-16. Viewport placement
+16. Overlay placement
 17. Layer
 18. Binding
 19. Transform
 20. Credential or auth grant
-21. Permission
-22. Capability policy
-23. Preview projection
-24. Render projection
-25. Render consumer or subscription
+21. Validation issue
+22. Permission
+23. Capability policy
+24. Preview projection
+25. Render projection
+26. Render consumer or subscription
 
 [Back to top](#nexis-domain-glossary)
 
@@ -930,7 +1038,7 @@ Why it is needed:
 
 ```mermaid
 graph TD
-  Project[Project or Workspace]
+  Project[NEXIS Project]
   Overlay[Overlay]
   OverlayDependency[Overlay Dependency]
   Revision[Overlay Revision and Publication State]
@@ -945,10 +1053,11 @@ graph TD
   DataFlowResource[Data Flow Resource]
   WidgetInstance[Widget Instance]
   Template[Template]
-  Placement[Viewport Placement]
+  Placement[Overlay Placement]
   Layer[Layer]
   Binding[Binding]
   Transform[Transform]
+  ValidationIssue[Validation Issue]
   Credential[Credential or Auth Grant]
   Permission[Permission]
   Policy[Capability Policy]
@@ -983,6 +1092,7 @@ graph TD
   Widget --> Template
   DataScraper -->|creates| DataSource
   DataScraper --> Credential
+  DataScraper --> Permission
   DataSource -->|feeds events| DataRetriever
   DataRetriever -->|produces| DataSource
   WidgetInstance --> Widget
@@ -990,8 +1100,10 @@ graph TD
   WidgetInstance --> Layer
   WidgetInstance --> Binding
   WidgetInstance --> Permission
-  Binding --> Transform
+  WidgetInstance --> Transform
+  WidgetInstance --> ValidationIssue
   Binding --> DataFlowResource
+  DataSource --> ValidationIssue
   DataFlowResource -->|listens to| DataSource
   Render --> Subscription
 
@@ -999,7 +1111,11 @@ graph TD
   classDef underdefined fill:#fff1c7,stroke:#8b6b00,color:#4e3a00;
   classDef missing fill:#ffd9d9,stroke:#a33a3a,color:#541d1d;
 
-  class Overlay,OverlayDependency,Widget,WidgetResource,DataScraper,DataRetriever,DataSource,DataFlowResource,WidgetInstance defined;
-  class Template,Placement,Permission,Preview,Render,Admin,Revision,Binding,ResourceTag,ArtDirection,Recipe underdefined;
-  class Project,Layer,Transform,Credential,Policy,Subscription missing;
+  class Overlay,OverlayDependency,Widget,WidgetResource,ArtDirection,DataScraper,DataRetriever,DataSource,DataFlowResource,WidgetInstance,Template,Placement,Layer,Transform,ValidationIssue,Permission,ResourceTag,Recipe defined;
+  class Revision underdefined;
+  class Binding defined;
+  class Preview,Render defined;
+  class Admin defined;
+  class Project defined;
+  class Credential,Policy,Subscription missing;
 ```
